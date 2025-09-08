@@ -20,3 +20,4 @@ export class SignupDto {
   @MinLength(6)
   confirmPassword: string;
 }
+

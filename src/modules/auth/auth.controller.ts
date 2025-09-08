@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, UnauthorizedException, BadRequestException, UseFilters, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Headers, UnauthorizedException, BadRequestException, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -12,9 +12,6 @@ import { VerifyOtpDto } from './dto/verify-otp';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guards';
 import { ForgetSendOtpDto } from './dto/forget-send.otp';
 import { ForgetVerifyOtpDto } from './dto/forget-verify-otp';
-
-
-
 
 @Controller('auth')
 export class AuthController {
