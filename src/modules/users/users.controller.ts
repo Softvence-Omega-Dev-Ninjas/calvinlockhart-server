@@ -1,17 +1,14 @@
-import { Body, Controller, Get, Param, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/users.update.dto';
 import { handleRequest } from 'src/common/utils/request.handler';
 
-
-
-
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
-
-    @Get(':email')
+  // Todo convert user login.... 
+  @Get(':email')
   async findOne(@Param('email') email: string) {
     return handleRequest(
       () => this.usersService.findOne(email),
@@ -26,5 +23,4 @@ export class UsersController {
       'User updated successfully',
     );
   }
-
 }

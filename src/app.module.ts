@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { ConfigModule } from '@nestjs/config';
 import { BibleModule } from './modules/bibles/bibles.module';
+import { TopicsModule } from './modules/topics/topics.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { BibleModule } from './modules/bibles/bibles.module';
     UsersModule,
     AuthModule,
     MailerModule,
-    BibleModule
+    BibleModule,
+    TopicsModule
   ],
 })
 export class AppModule {}

@@ -7,7 +7,10 @@ export class ResetPasswordDto {
   @MinLength(6)
   newPassword: string;
 
-  @ApiProperty({ example: 'NewStrongPass123', description: 'Confirm password (must match newPassword)' })
+  @ApiProperty({
+    example: 'NewStrongPass123',
+    description: 'Confirm password (must match newPassword)',
+  })
   @IsNotEmpty()
   confirmPassword: string;
 }

@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { BibleService } from './bibles.service';
 import { BibleController } from './bibles.controller';
 
-
 @Module({
   providers: [BibleService],
   controllers: [BibleController],

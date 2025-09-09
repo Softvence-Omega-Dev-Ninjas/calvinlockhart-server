@@ -9,7 +9,7 @@ export class BibleService {
 
   async getVerse(reference: string): Promise<any> {
     try {
-      const response = await axios.get(`${this.baseUrl}${reference}`);
+      const response = await axios.get(`${this.baseUrl}/${reference}`);
       return response.data;
     } catch (error) {
       throw new Error('Error fetching Bible verse');

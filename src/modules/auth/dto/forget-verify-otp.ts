@@ -3,7 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { VerificationType } from '@prisma/client';
 
 export class ForgetVerifyOtpDto {
-  @ApiProperty({ example: 'user@example.com', description: 'User email address' })
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'User email address',
+  })
   @IsEmail()
   email: string;
 

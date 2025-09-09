@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { TokenService } from './token.service';
 import { MailerService } from '../mailer/mailer.service';
@@ -7,7 +13,6 @@ import * as bcrypt from 'bcryptjs';
 import { VerificationType } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { generateOTP } from 'src/common/utils/otp.util';
-
 
 @Injectable()
 export class AuthService {
@@ -19,8 +24,18 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(email: string, password: string, confirmPassword:string, username?: string) {
-    const user = await this.users.createUser(email, password, confirmPassword, username);
+  async signup(
+    email: string,
+    password: string,
+    confirmPassword: string,
+    username?: string,
+  ) {
+    const user = await this.users.createUser(
+      email,
+      password,
+      confirmPassword,
+      username,
+    );
     // const code = generateOTP(4);
     // await this.tokenService.createToken(user.id, code, VerificationType.EMAIL_VERIFICATION, Number(this.config.get('OTP_EXPIRES_MINUTES') || 10));
     // await this.mailer.sendVerificationEmail(email, code);
@@ -30,20 +45,28 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
-    if(!user.isEmailVerified ){
-       throw new BadRequestException("Please Verify your Email.")
+    if (!user.isEmailVerified) {
+      throw new BadRequestException('Please Verify your Email.');
     }
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) throw new UnauthorizedException('Invalid credentials Password Doesn Not Match');
+    if (!ok)
+      throw new UnauthorizedException(
+        'Invalid credentials Password Doesn Not Match',
+      );
     const payload = { sub: user.id, email: user.email };
-    return { user,access_token: this.jwt.sign(payload) };
+    return { user, access_token: this.jwt.sign(payload) };
   }
 
   async sendOtpForType(email: string, type: VerificationType) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException('No such user');
     const code = generateOTP(4);
-    await this.tokenService.createToken(user.id, code, type, Number(this.config.get('OTP_EXPIRES_MINUTES') || 10));
+    await this.tokenService.createToken(
+      user.id,
+      code,
+      type,
+      Number(this.config.get('OTP_EXPIRES_MINUTES') || 10),
+    );
     if (type === VerificationType.PASSWORD_RESET) {
       await this.mailer.sendPasswordResetEmail(email, code);
     } else {
@@ -61,21 +84,22 @@ export class AuthService {
       await this.users.setEmailVerified(user.id);
       return { message: 'Email verified' };
     } else if (type === VerificationType.PASSWORD_RESET) {
-      const expiresIn = Number(this.config.get('RESET_TOKEN_EXPIRES_SECONDS') || 900);
+      const expiresIn = Number(
+        this.config.get('RESET_TOKEN_EXPIRES_SECONDS') || 900,
+      );
       const token = this.jwt.sign({ sub: user.id, reset: true }, { expiresIn });
       return { resetToken: token };
     }
     return { message: 'OK' };
   }
 
-  
   async resetPassword(userId: string, newPassword: string) {
-    const user = await this.users.findById(userId)
-    if(!user){
-      throw new UnauthorizedException("Unauthorized Access")
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Unauthorized Access');
     }
-    if(!user.isEmailVerified ){
-       throw new BadRequestException("Please Verify your Email.")
+    if (!user.isEmailVerified) {
+      throw new BadRequestException('Please Verify your Email.');
     }
     return this.users.updatePassword(userId, newPassword);
   }

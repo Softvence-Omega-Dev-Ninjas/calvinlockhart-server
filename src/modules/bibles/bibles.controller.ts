@@ -3,7 +3,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { BibleService } from './bibles.service';
 
-
 @Controller('bible')
 export class BibleController {
   constructor(private readonly bibleService: BibleService) {}
@@ -17,4 +16,3 @@ export class BibleController {
     };
   }
 }
-

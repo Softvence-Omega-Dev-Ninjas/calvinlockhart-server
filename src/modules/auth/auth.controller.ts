@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Headers, UnauthorizedException, BadRequestException, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  UnauthorizedException,
+  BadRequestException,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -15,11 +24,20 @@ import { ForgetVerifyOtpDto } from './dto/forget-verify-otp';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private auth: AuthService, private jwt: JwtService, private config: ConfigService) { }
+  constructor(
+    private auth: AuthService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   @Post('signup')
   async signup(@Body() dto: SignupDto) {
-    return this.auth.signup(dto.email, dto.password, dto.confirmPassword, dto.username);
+    return this.auth.signup(
+      dto.email,
+      dto.password,
+      dto.confirmPassword,
+      dto.username,
+    );
   }
 
   @Post('login')
@@ -28,7 +46,7 @@ export class AuthController {
   }
 
   @Post('send-code')
-  @ApiOperation({ summary: "Email Verify." })
+  @ApiOperation({ summary: 'Email Verify.' })
   async sendCode(@Body() dto: SendOtpDto) {
     const type = VerificationType[dto.type];
     return this.auth.sendOtpForType(dto.email, type);
@@ -45,7 +63,8 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
-    if (dto.newPassword !== dto.confirmPassword) throw new UnauthorizedException('Passwords do not match');
+    if (dto.newPassword !== dto.confirmPassword)
+      throw new UnauthorizedException('Passwords do not match');
     const userId = req.user.sub;
     await this.auth.resetPassword(userId, dto.newPassword);
     return { message: `Password updated` };
@@ -53,20 +72,23 @@ export class AuthController {
 
   // forget Password...
   @Post('forgot-password')
-  @ApiOperation({ summary: "Forget Password" })
+  @ApiOperation({ summary: 'Forget Password' })
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgetSendOtpDto) {
     // Always use type PASSWORD_RESET
-    const type = VerificationType[dto.type]
+    const type = VerificationType[dto.type];
     return this.auth.sendOtpForType(dto.email, type);
   }
 
   @Post('verify-forget-code')
   async verifyResetCode(@Body() dto: ForgetVerifyOtpDto) {
     // Verify OTP and return short-lived reset token
-    return this.auth.verifyOtp(dto.email, dto.code, VerificationType.PASSWORD_RESET);
+    return this.auth.verifyOtp(
+      dto.email,
+      dto.code,
+      VerificationType.PASSWORD_RESET,
+    );
   }
-
 
   @ApiTags('Auth')
   @ApiBearerAuth('JWT-auth')
@@ -84,5 +106,4 @@ export class AuthController {
     await this.auth.resetPassword(req.user.sub, dto.newPassword);
     return { message: 'Password successfully updated' };
   }
-
 }
