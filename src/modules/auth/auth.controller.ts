@@ -30,6 +30,7 @@ export class AuthController {
     private config: ConfigService,
   ) {}
 
+  @ApiOperation({ summary: "Register new user" })
   @Post('signup')
   async signup(@Body() dto: SignupDto) {
     return this.auth.signup(
@@ -40,18 +41,21 @@ export class AuthController {
     );
   }
 
+  @ApiOperation({ summary: "Login  User" })
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.auth.login(dto.email, dto.password);
   }
 
+  
   @Post('send-code')
-  @ApiOperation({ summary: 'Email Verify.' })
+  @ApiOperation({ summary: 'Send email verify code.' })
   async sendCode(@Body() dto: SendOtpDto) {
     const type = VerificationType[dto.type];
     return this.auth.sendOtpForType(dto.email, type);
   }
 
+   @ApiOperation({ summary: 'Verify code.' })
   @Post('verify-code')
   async verifyCode(@Body() dto: VerifyOtpDto) {
     const type = VerificationType[dto.type];
@@ -62,6 +66,7 @@ export class AuthController {
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   @Post('reset-password')
+   @ApiOperation({ summary: 'set new password.' })
   async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
     if (dto.newPassword !== dto.confirmPassword)
       throw new UnauthorizedException('Passwords do not match');
@@ -81,6 +86,7 @@ export class AuthController {
   }
 
   @Post('verify-forget-code')
+    @ApiOperation({ summary: 'Send verify code for forget password.' })
   async verifyResetCode(@Body() dto: ForgetVerifyOtpDto) {
     // Verify OTP and return short-lived reset token
     return this.auth.verifyOtp(
@@ -92,8 +98,9 @@ export class AuthController {
 
   @ApiTags('Auth')
   @ApiBearerAuth('JWT-auth')
-  @UseGuards(JwtAuthGuard) // Protect with JWT
+  @UseGuards(JwtAuthGuard) 
   @Post('set-new-password')
+   @ApiOperation({ summary: 'set new password.' })
   async setNewPassword(@Body() dto: ResetPasswordDto, @Request() req) {
     if (dto.newPassword !== dto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
