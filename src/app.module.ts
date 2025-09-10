@@ -4,8 +4,8 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailerModule } from './modules/mailer/mailer.module';
 import { ConfigModule } from '@nestjs/config';
-import { BibleModule } from './modules/bibles/bibles.module';
 import { TopicsModule } from './modules/topics/topics.module';
+import { BiblesGroupModule } from './modules/bibles/bibles.group.module';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { TopicsModule } from './modules/topics/topics.module';
     UsersModule,
     AuthModule,
     MailerModule,
-    BibleModule,
+    BiblesGroupModule,
     TopicsModule
   ],
 })
