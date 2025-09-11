@@ -16,7 +16,6 @@ export class UsersService {
     email: string,
     password: string,
     confirmPassword: string,
-    username?: string,
   ) {
     const exists = await this.prisma.user.findUnique({ where: { email } });
     if (exists) throw new BadRequestException('Email already used');
@@ -26,7 +25,7 @@ export class UsersService {
       throw new BadRequestException('Please Provide Valid Credentials.');
     }
     return this.prisma.user.create({
-      data: { email, password: hashed, username },
+      data: { email, password: hashed},
     });
   }
 

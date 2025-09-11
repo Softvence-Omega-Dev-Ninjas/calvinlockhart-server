@@ -19,6 +19,7 @@ export class TopicsService {
     return await this.prisma.topic.create({
       data: {
         name: dto.name,
+        destination:dto.destination,
         userId,
         precepts: {
           create: dto.precepts?.map((p) => ({
@@ -74,6 +75,7 @@ export class TopicsService {
       where: { id },
       data: {
         name: dto.name,
+        destination:dto.destination,
         precepts: {
           deleteMany: {},
           create: dto.precepts?.map((p) => ({
@@ -110,51 +112,53 @@ export class TopicsService {
     );
     return { message: 'Precepts added successfully', precepts };
   }
+
+  
   // added fovourite topic..
-  async addFovorite(userId: string, topicId: string) {
-    const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
-    if (!topic) throw new NotFoundException('Topic not found');
+  // async addFovorite(userId: string, topicId: string) {
+  //   const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
+  //   if (!topic) throw new NotFoundException('Topic not found');
 
-    const user = await this.prisma.user.findFirst({ where: { id: userId } })
-    if (!user) throw new BadRequestException('unauthorized access');
+  //   const user = await this.prisma.user.findFirst({ where: { id: userId } })
+  //   if (!user) throw new BadRequestException('unauthorized access');
 
-    const existing = await this.prisma.favorite.findUnique({
-      where: { userId_topicId: { userId, topicId } },
-    });
-    if (existing) throw new BadRequestException('Topic already favorited');
+  //   const existing = await this.prisma.favorite.findUnique({
+  //     where: { userId_topicId: { userId, topicId } },
+  //   });
+  //   if (existing) throw new BadRequestException('Topic already favorited');
 
-    const favorite = await this.prisma.favorite.create({
-      data: {
-        userId,
-        topicId
-      },
-      include: {
-        topic: true
-      }
-    });
-    return favorite
-  }
+  //   const favorite = await this.prisma.favorite.create({
+  //     data: {
+  //       userId,
+  //       topicId
+  //     },
+  //     include: {
+  //       topic: true
+  //     }
+  //   });
+  //   return favorite
+  // }
 
-  // remove favourite topic...
-  async removeFovorite(userId: string, topicId: string) {
-    const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
-    if (!topic) throw new NotFoundException('Topic not found');
+  // // remove favourite topic...
+  // async removeFovorite(userId: string, topicId: string) {
+  //   const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
+  //   if (!topic) throw new NotFoundException('Topic not found');
 
-    const user = await this.prisma.user.findFirst({ where: { id: userId } })
-    if (!user) throw new BadRequestException('unauthorized access');
-    const favorite = await this.prisma.favorite.findUnique({
-      where: { userId_topicId: { userId, topicId } },
-    });
-    if (!favorite) throw new NotFoundException('Favorite not found');
+  //   const user = await this.prisma.user.findFirst({ where: { id: userId } })
+  //   if (!user) throw new BadRequestException('unauthorized access');
+  //   const favorite = await this.prisma.favorite.findUnique({
+  //     where: { userId_topicId: { userId, topicId } },
+  //   });
+  //   if (!favorite) throw new NotFoundException('Favorite not found');
 
-    await this.prisma.favorite.delete({ where: { userId_topicId: { userId, topicId } } });
-    return { message: 'Topic removed from favorites' };
-  }
-  // get favorite...
-  async getFovorites(userId: string){
-    const favorites = await this.prisma.favorite.findMany({where:{ userId: userId}, include:{topic:true}})
-    console.log(favorites)
-    return favorites
-  }
+  //   await this.prisma.favorite.delete({ where: { userId_topicId: { userId, topicId } } });
+  //   return { message: 'Topic removed from favorites' };
+  // }
+  // // get favorite...
+  // async getFovorites(userId: string){
+  //   const favorites = await this.prisma.favorite.findMany({where:{ userId: userId}, include:{topic:true}})
+  //   console.log(favorites)
+  //   return favorites
+  // }
 
 }

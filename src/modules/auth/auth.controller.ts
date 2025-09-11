@@ -31,14 +31,14 @@ export class AuthController {
     private config: ConfigService,
   ) {}
 
-  @ApiOperation({ summary: "Register new user" })
+  @ApiOperation({ summary: "Register new user"})
   @Post('signup')
   async signup(@Body() dto: SignupDto) {
     return this.auth.signup(
       dto.email,
       dto.password,
       dto.confirmPassword,
-      dto.username,
+   
     );
   }
 

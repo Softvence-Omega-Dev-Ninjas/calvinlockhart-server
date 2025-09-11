@@ -28,17 +28,14 @@ export class AuthService {
     email: string,
     password: string,
     confirmPassword: string,
-    username?: string,
+  
   ) {
     const user = await this.users.createUser(
       email,
       password,
       confirmPassword,
-      username,
     );
-    // const code = generateOTP(4);
-    // await this.tokenService.createToken(user.id, code, VerificationType.EMAIL_VERIFICATION, Number(this.config.get('OTP_EXPIRES_MINUTES') || 10));
-    // await this.mailer.sendVerificationEmail(email, code);
+  
     return { message: 'User Registered. Please Verify Your Email.' };
   }
 
