@@ -7,7 +7,7 @@ import { JwtAuthGuard } from "src/common/guards/jwt.guards";
 import { AddPreceptsDto } from "./dto/create.precept.dto";
 
 
-@ApiTags('Auth')
+@ApiTags('Topics')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('topics')
