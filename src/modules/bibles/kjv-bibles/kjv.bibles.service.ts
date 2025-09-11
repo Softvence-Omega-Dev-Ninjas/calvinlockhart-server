@@ -5,6 +5,10 @@ import axios from 'axios';
 export class KjvBiblesService {
   private readonly baseUrl = 'https://bible.helloao.org/api/eng_kjv/books.json';
 
+  private bookCovers:Record<string, string>={
+    GEN:"https://mycdn.com/bible-covers/genesis.png",
+  };
+
   async getVerse(): Promise<any> {
     try {
       const response = await axios.get(`${this.baseUrl}`);

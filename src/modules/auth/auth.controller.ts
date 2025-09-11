@@ -21,6 +21,7 @@ import { VerifyOtpDto } from './dto/verify-otp';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guards';
 import { ForgetSendOtpDto } from './dto/forget-send.otp';
 import { ForgetVerifyOtpDto } from './dto/forget-verify-otp';
+import { setPasswordDto } from './dto/set-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -67,11 +68,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('reset-password')
    @ApiOperation({ summary: 'set new password.' })
-  async resetPassword(@Body() dto: ResetPasswordDto, @Request() req) {
+  async resetPassword(@Body() dto: setPasswordDto, @Request() req) {
     if (dto.newPassword !== dto.confirmPassword)
       throw new UnauthorizedException('Passwords do not match');
     const userId = req.user.sub;
-    await this.auth.resetPassword(userId, dto.newPassword);
+    await this.auth.resetPassword(userId, dto.oldPassword, dto.newPassword);
     return { message: `Password updated` };
   }
 
@@ -96,6 +97,8 @@ export class AuthController {
     );
   }
 
+
+  // forget password
   @ApiTags('Auth')
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard) 
@@ -110,7 +113,7 @@ export class AuthController {
       throw new UnauthorizedException('Invalid reset token');
     }
 
-    await this.auth.resetPassword(req.user.sub, dto.newPassword);
+    await this.auth.setPassword(req.user.sub, dto.newPassword);
     return { message: 'Password successfully updated' };
   }
 }

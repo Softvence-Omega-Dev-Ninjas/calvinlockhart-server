@@ -6,8 +6,9 @@ import { AddPreceptsDto } from "./dto/create.precept.dto";
 @Injectable()
 export class TopicsService {
   constructor(private prisma: PrismaService) { }
-
+  // create new topic
   async createTopic(userId: string, dto: CreateTopicDto) {
+    console.log(userId)
     const user = await this.prisma.user.findFirst({
       where: { id: userId }
     })
@@ -29,14 +30,14 @@ export class TopicsService {
       include: { precepts: true }
     });
   }
-
+  //  find user all topics
   async findAll(userId: string) {
     return this.prisma.topic.findMany({
       where: { userId },
       include: { precepts: true },
     });
   }
-
+  // find topic
   async findOne(userId: string, id: string) {
     const user = await this.prisma.user.findFirst({ where: { id: userId } })
     if (!user) {
@@ -51,7 +52,7 @@ export class TopicsService {
       include: { precepts: true },
     });
   }
-
+  // remove topic
   async removeTopic(userId: string, id: string) {
     const topic = await this.prisma.topic.findUnique({ where: { id } })
     if (!topic || topic.userId !== userId) {
@@ -62,7 +63,7 @@ export class TopicsService {
     })
     return null
   }
-
+  // update topic
   async updateTopic(userId: string, id: string, dto: CreateTopicDto) {
     const topic = await this.prisma.topic.findUnique({ where: { id } });
     if (!topic || topic.userId !== userId) {
@@ -84,25 +85,76 @@ export class TopicsService {
       include: { precepts: true },
     });
   }
-
+  // add precepts
   async addPrecepts(userId: string, topicId: string, dto: AddPreceptsDto) {
     const topic = await this.prisma.topic.findUnique({ where: { id: topicId } })
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException('Not allowed to update this topic');
     }
-    const precept = await this.prisma.precept.create({
-      data: {
-        content: 'Some content',
-        reference: 'Some reference',
-        topic: {
-          connect: { id: topicId }, // or create if new
-        },
-      },
+    if (!dto.precepts?.length) {
+      throw new BadRequestException("Precepts Data required.")
+    }
+    const precepts = await Promise.all(
+
+      dto.precepts.map((p) =>
+        this.prisma.precept.create({
+          data: {
+            reference: p.reference,
+            content: p.content,
+            topic: {
+              connect: { id: topicId },
+            },
+          },
+        }),
+      ),
+    );
+    return { message: 'Precepts added successfully', precepts };
+  }
+  // added fovourite topic..
+  async addFovorite(userId: string, topicId: string) {
+    const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
+    if (!topic) throw new NotFoundException('Topic not found');
+
+    const user = await this.prisma.user.findFirst({ where: { id: userId } })
+    if (!user) throw new BadRequestException('unauthorized access');
+
+    const existing = await this.prisma.favorite.findUnique({
+      where: { userId_topicId: { userId, topicId } },
     });
+    if (existing) throw new BadRequestException('Topic already favorited');
 
-
-
+    const favorite = await this.prisma.favorite.create({
+      data: {
+        userId,
+        topicId
+      },
+      include: {
+        topic: true
+      }
+    });
+    return favorite
   }
 
+  // remove favourite topic...
+  async removeFovorite(userId: string, topicId: string) {
+    const topic = await this.prisma.topic.findUnique({ where: { id: topicId } });
+    if (!topic) throw new NotFoundException('Topic not found');
+
+    const user = await this.prisma.user.findFirst({ where: { id: userId } })
+    if (!user) throw new BadRequestException('unauthorized access');
+    const favorite = await this.prisma.favorite.findUnique({
+      where: { userId_topicId: { userId, topicId } },
+    });
+    if (!favorite) throw new NotFoundException('Favorite not found');
+
+    await this.prisma.favorite.delete({ where: { userId_topicId: { userId, topicId } } });
+    return { message: 'Topic removed from favorites' };
+  }
+  // get favorite...
+  async getFovorites(userId: string){
+    const favorites = await this.prisma.favorite.findMany({where:{ userId: userId}, include:{topic:true}})
+    console.log(favorites)
+    return favorites
+  }
 
 }

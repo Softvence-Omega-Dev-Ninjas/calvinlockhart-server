@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
@@ -44,13 +45,31 @@ export class UsersService {
     });
   }
 
-  async updatePassword(userId: string, newPassword: string) {
+  async updatePassword(userId: string, oldPassword:string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({where:{id:userId}})
+    if(!user){
+      throw new NotFoundException("User Not found")
+    }
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if(!isMatch){
+       throw new UnauthorizedException('Invalid credentials Old Password is Invalide');
+    }
     const hashed = await bcrypt.hash(newPassword, 10);
     return this.prisma.user.update({
       where: { id: userId },
       data: { password: hashed },
     });
   }
+  
+   async forgetUpdatePassword(userId: string, newPassword: string) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+  }
+
+  
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({ where: { id } });

@@ -92,8 +92,8 @@ export class AuthService {
     }
     return { message: 'OK' };
   }
-
-  async resetPassword(userId: string, newPassword: string) {
+// reset password...
+  async resetPassword(userId: string, oldPassword:string, newPassword: string) {
     const user = await this.users.findById(userId);
     if (!user) {
       throw new UnauthorizedException('Unauthorized Access');
@@ -101,6 +101,18 @@ export class AuthService {
     if (!user.isEmailVerified) {
       throw new BadRequestException('Please Verify your Email.');
     }
-    return this.users.updatePassword(userId, newPassword);
+    return this.users.updatePassword(userId,oldPassword, newPassword);
+  }
+
+  // forget password
+  async setPassword(userId: string, newPassword: string) {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Unauthorized Access');
+    }
+    if (!user.isEmailVerified) {
+      throw new BadRequestException('Please Verify your Email.');
+    }
+    return this.users.forgetUpdatePassword(userId, newPassword);
   }
 }
