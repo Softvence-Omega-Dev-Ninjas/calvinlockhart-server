@@ -13,7 +13,7 @@ export class UpdateUserDto {
 
   @ApiProperty({
     example: 'doe',
-    description: 'Lastname ',
+    description: 'Lastname',
     required: false,
   })
   @IsString()
