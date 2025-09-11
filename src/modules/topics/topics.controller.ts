@@ -78,38 +78,5 @@ export class TopicsController {
             'Added Another Precepts successfully',
         );
     }
-
-
-    
-    // // create favorite list.
-    // @Post(':topicId/favorite')
-    // @ApiOperation({ summary: "Topic added to favorites" })
-    // async addFovorite(@Param('topicId') topicId: string, @Request() req) {
-    //     const userId = req.user.sub;
-    //     return handleRequest(
-    //         () => this.service.addFovorite(userId, topicId),
-    //         'Topic added to favorites successfully',
-    //     );
-    // }
-
-    // // remove fovorite list 
-    // @Delete(':topicId/removeFav')
-    // async removeFovorite(@Param('topicId') topicId: string, @Request() req) {
-    //     const userId = req.user.sub;
-    //     return handleRequest(
-    //         () => this.service.removeFovorite(userId, topicId),
-    //         'Topic removed from favorites',
-    //     );
-    // }
-
-    // @Get('/favorites')
-    // async getFovorites(@Request() req) {
-    //     const userId = req.user.sub;
-    //     console.log('Hit get fav', userId)
-    //     return handleRequest(
-    //         () => this.service.getFovorites(userId),
-    //         'Get All favorite.',
-    //     );
-    // }
-
+   
 }
