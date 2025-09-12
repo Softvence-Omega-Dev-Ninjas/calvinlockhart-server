@@ -1,5 +1,5 @@
 import { IsOptional, IsString, MinLength, IsUrl } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -28,12 +28,29 @@ export class UpdateUserDto {
   @MinLength(10)
   bio?: string;
 
-  @ApiProperty({
-    example: 'https://example.com/avatar.png',
-    description: 'Profile picture URL',
-    required: false,
-  })
+
   @IsOptional()
   @IsUrl()
   userAvatar?: string;
+
+  @ApiProperty({ type: 'string', format: 'binary', description: 'The file to upload' })
+  @IsOptional()
+  file?: any; // Represents the uploaded file
 }
+
+
+export const apiBodyExample = {
+  schema: {
+    type: "object",
+    properties: {
+      files: {
+        type: "array",
+        items: {
+          type: "string",
+          format: "binary",
+        },
+        maxItems: 20,
+      },
+    },
+  },
+};
