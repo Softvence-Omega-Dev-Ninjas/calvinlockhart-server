@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
 import { TopicsService } from "./topics.service";
 import { CreateTopicDto } from "./dto/create.topic.dto";
 import { handleRequest } from "src/common/utils/request.handler";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/common/guards/jwt.guards";
 import { AddPreceptsDto } from "./dto/create.precept.dto";
+import { QueryTopicDto } from "./dto/topic.query.dto";
 
 
 @ApiTags('Topics')
@@ -35,6 +36,33 @@ export class TopicsController {
             'Get All Topic successfully',
         );
     }
+
+    @Get('/precepts-topic')
+    findPreceptTopic(@Request() req,  @Query() query?: QueryTopicDto){
+        const userId = req.user.sub;
+        return handleRequest(
+            () => this.service.findPreceptTopic(userId, query),
+            'Get All Precept Topic successfully',
+        );
+    }
+    @Get('/lessons-topic')
+    findLessonTopic(@Request() req,  @Query() query?: QueryTopicDto){
+        const userId = req.user.sub;
+        return handleRequest(
+            () => this.service.findLessonTopic(userId, query),
+            'Get All Lesson Topic successfully',
+        );
+    }
+    @Get('/favorites-topic')
+    findFavoriteTopic(@Request() req,  @Query() query?: QueryTopicDto){
+        const userId = req.user.sub;
+        return handleRequest(
+            () => this.service.findFavoriteTopic(userId, query),
+            'Get All Favorites Topic successfully',
+        );
+    }
+
+
 
     // Get Single Topic
     @ApiOperation({ summary: "Get a Single Topic" })

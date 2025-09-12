@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTopicDto } from "./dto/create.topic.dto";
 import { AddPreceptsDto } from "./dto/create.precept.dto";
+import { QueryTopicDto } from "./dto/topic.query.dto";
 
 @Injectable()
 export class TopicsService {
@@ -19,7 +20,7 @@ export class TopicsService {
     return await this.prisma.topic.create({
       data: {
         name: dto.name,
-        destination:dto.destination,
+        destination: dto.destination,
         userId,
         precepts: {
           create: dto.precepts?.map((p) => ({
@@ -35,9 +36,11 @@ export class TopicsService {
   async findAll(userId: string) {
     return this.prisma.topic.findMany({
       where: { userId },
-      include: { precepts: true},
+      include: { precepts: true },
     });
   }
+
+
   // find topic
   async findOne(userId: string, id: string) {
     const user = await this.prisma.user.findFirst({ where: { id: userId } })
@@ -50,9 +53,142 @@ export class TopicsService {
     }
     return this.prisma.topic.findFirst({
       where: { id, userId },
-      include: { precepts: true, notes:true },
+      include: { precepts: true, notes: true },
     });
   }
+  // precepts topic
+  async findPreceptTopic(userId: string, query?: QueryTopicDto) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Unauthorized Access.');
+    }
+    const q = query?.q;
+    const hasQuery = q && q.trim() !== '';
+    const preceptTopic = await this.prisma.topic.findMany({
+      where: {
+        userId,
+        destination: 'PRECEPT_TOPIC',
+        ...(hasQuery
+          ? {
+            OR: [
+              { name: { contains: q, mode: 'insensitive' } },
+              {
+                precepts: {
+                  some: {
+                    OR: [
+                      { reference: { contains: q, mode: 'insensitive' } },
+                      { content: { contains: q, mode: 'insensitive' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          }
+          : {}),
+      },
+      include: {
+        precepts: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (!preceptTopic || preceptTopic.length === 0) {
+      throw new NotFoundException('Precept Topic not found');
+    }
+
+    return preceptTopic;
+  }
+  // lessons topic
+  async findLessonTopic(userId: string, query?: QueryTopicDto) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Unauthorized Access.');
+    }
+    const q = query?.q;
+    const hasQuery = q && q.trim() !== '';
+    const preceptTopic = await this.prisma.topic.findMany({
+      where: {
+        userId,
+        destination: 'LESSON_PRECEPTS',
+        ...(hasQuery
+          ? {
+            OR: [
+              { name: { contains: q, mode: 'insensitive' } },
+              {
+                precepts: {
+                  some: {
+                    OR: [
+                      { reference: { contains: q, mode: 'insensitive' } },
+                      { content: { contains: q, mode: 'insensitive' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          }
+          : {}),
+      },
+      include: {
+        precepts: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (!preceptTopic || preceptTopic.length === 0) {
+      throw new NotFoundException('Precept Topic not found');
+    }
+
+    return preceptTopic;
+  }
+  // favorite topic
+  async findFavoriteTopic(userId: string, query?: QueryTopicDto) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Unauthorized Access.');
+    }
+    const q = query?.q;
+    const hasQuery = q && q.trim() !== '';
+    const preceptTopic = await this.prisma.topic.findMany({
+      where: {
+        userId,
+        destination: 'FAVORITES',
+        ...(hasQuery
+          ? {
+            OR: [
+              { name: { contains: q, mode: 'insensitive' } },
+              {
+                precepts: {
+                  some: {
+                    OR: [
+                      { reference: { contains: q, mode: 'insensitive' } },
+                      { content: { contains: q, mode: 'insensitive' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          }
+          : {}),
+      },
+      include: {
+        precepts: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    if (!preceptTopic || preceptTopic.length === 0) {
+      throw new NotFoundException('Precept Topic not found');
+    }
+
+    return preceptTopic;
+  }
+
   // remove topic
   async removeTopic(userId: string, id: string) {
     const topic = await this.prisma.topic.findUnique({ where: { id } })
@@ -75,7 +211,7 @@ export class TopicsService {
       where: { id },
       data: {
         name: dto.name,
-        destination:dto.destination,
+        destination: dto.destination,
         precepts: {
           deleteMany: {},
           create: dto.precepts?.map((p) => ({
@@ -112,6 +248,6 @@ export class TopicsService {
     );
     return { message: 'Precepts added successfully', precepts };
   }
-  
+
 
 }
