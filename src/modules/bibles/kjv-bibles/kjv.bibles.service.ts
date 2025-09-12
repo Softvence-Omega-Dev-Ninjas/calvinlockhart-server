@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { bookExtras } from './bookExtra';
 
 @Injectable()
 export class KjvBiblesService {
@@ -12,7 +13,13 @@ export class KjvBiblesService {
   async getVerse(): Promise<any> {
     try {
       const response = await axios.get(`${this.baseUrl}`);
-      return response.data.books;
+     const books = response.data.books;
+    
+     const booksWithExtras = books.map((book:any)=> ({
+      ...book,
+      ...(bookExtras[book.id] || {})
+     }))
+      return booksWithExtras;
     } catch (error) {
       throw new Error('Error fetching Bible verse');
     }
