@@ -22,29 +22,29 @@ export class AuthService {
     private mailer: MailerService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async signup(
     email: string,
     password: string,
     confirmPassword: string,
-  
+
   ) {
     const user = await this.users.createUser(
       email,
       password,
       confirmPassword,
     );
-  
+
     return { message: 'User Registered. Please Verify Your Email.' };
   }
 
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
-    if (!user.isEmailVerified) {
-      throw new BadRequestException('Please Verify your Email.');
-    }
+    // if (!user.isEmailVerified) {
+    //   throw new BadRequestException('Please Verify your Email.');
+    // }
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(
@@ -89,8 +89,8 @@ export class AuthService {
     }
     return { message: 'OK' };
   }
-// reset password...
-  async resetPassword(userId: string, oldPassword:string, newPassword: string) {
+  // reset password...
+  async resetPassword(userId: string, oldPassword: string, newPassword: string) {
     const user = await this.users.findById(userId);
     if (!user) {
       throw new UnauthorizedException('Unauthorized Access');
@@ -98,7 +98,7 @@ export class AuthService {
     if (!user.isEmailVerified) {
       throw new BadRequestException('Please Verify your Email.');
     }
-    return this.users.updatePassword(userId,oldPassword, newPassword);
+    return this.users.updatePassword(userId, oldPassword, newPassword);
   }
 
   // forget password
