@@ -98,19 +98,22 @@ export class TopicsService {
       throw new NotFoundException('Precept Topic not found');
     }
     // Shuffle topics randomly
-    const shuffledTopics = preceptTopic.sort(() => 0.5 - Math.random());
+    // const shuffledTopics = preceptTopic.sort(() => 0.5 - Math.random());
 
-    // For each topic, pick a random precept
-    const result = shuffledTopics.map((topic) => {
-      const precepts = topic.precepts;
-      if (!precepts || precepts.length === 0) return { ...topic, randomPrecept: null };
+    // // For each topic, pick a random precept
+    // const result = shuffledTopics.map((topic) => {
+    //   const precepts = topic.precepts;
+    //   if (!precepts || precepts.length === 0) return { ...topic, randomPrecept: null };
 
-      const randomIndex = Math.floor(Math.random() * precepts.length);
-      return { ...topic, randomPrecept: precepts[randomIndex] };
-    });
+    //   const randomIndex = Math.floor(Math.random() * precepts.length);
+    //   return { ...topic, randomPrecept: precepts[randomIndex] };
+    // });
 
-    return result;
+    return preceptTopic;
   }
+
+
+
   // lessons topic
   async findLessonTopic(userId: string, query?: QueryTopicDto) {
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
