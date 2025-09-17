@@ -6,5 +6,6 @@ import { KjvBiblesController } from './kjv.bibles.controller';
 @Module({
   providers: [KjvBiblesService],
   controllers: [KjvBiblesController],
+  exports: [KjvBiblesService]
 })
-export class KjvBiblesModule {}
+export class KjvBiblesModule { }
