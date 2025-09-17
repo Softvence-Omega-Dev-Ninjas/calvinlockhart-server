@@ -7,12 +7,11 @@ export class MailerService {
   private transporter: nodemailer.Transporter;
   constructor(private config: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      host: config.get('SMTP_HOST'),
+      port: Number(config.get('SMTP_PORT')),
       auth: {
-        user: this.config.get('SMTP_USER'),
-        pass: this.config.get('SMTP_PASS'),
+        user: config.get('SMTP_USER'),
+        pass: config.get('SMTP_PASS'),
       },
     });
   }
