@@ -24,18 +24,9 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(
-    email: string,
-    password: string,
-    confirmPassword: string,
-  
-  ) {
-    const user = await this.users.createUser(
-      email,
-      password,
-      confirmPassword,
-    );
-  
+  async signup(email: string, password: string, confirmPassword: string) {
+    const user = await this.users.createUser(email, password, confirmPassword);
+
     return { message: 'User Registered. Please Verify Your Email.' };
   }
 
@@ -48,7 +39,7 @@ export class AuthService {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(
-        'Invalid credentials Password Doesn Not Match',
+        'Invalid credentials Password Does Not Match',
       );
     const payload = { sub: user.id, email: user.email };
     return { user, access_token: this.jwt.sign(payload) };
@@ -89,8 +80,12 @@ export class AuthService {
     }
     return { message: 'OK' };
   }
-// reset password...
-  async resetPassword(userId: string, oldPassword:string, newPassword: string) {
+  // reset password...
+  async resetPassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.users.findById(userId);
     if (!user) {
       throw new UnauthorizedException('Unauthorized Access');
@@ -98,7 +93,7 @@ export class AuthService {
     if (!user.isEmailVerified) {
       throw new BadRequestException('Please Verify your Email.');
     }
-    return this.users.updatePassword(userId,oldPassword, newPassword);
+    return this.users.updatePassword(userId, oldPassword, newPassword);
   }
 
   // forget password
