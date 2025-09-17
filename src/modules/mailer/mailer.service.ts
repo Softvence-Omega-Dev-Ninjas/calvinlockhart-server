@@ -8,7 +8,7 @@ export class MailerService {
   constructor(private config: ConfigService) {
     this.transporter = nodemailer.createTransport({
       host: config.get('SMTP_HOST'),
-      port: Number(config.get('SMTP_PORT')),
+      port: 465,
       auth: {
         user: config.get('SMTP_USER'),
         pass: config.get('SMTP_PASS'),
@@ -27,6 +27,7 @@ export class MailerService {
       });
     } catch (err) {
       console.log(err)
+      throw Error("Failed to send mail", err.message)
     }
   }
 
@@ -40,6 +41,7 @@ export class MailerService {
       });
     } catch (err) {
       console.log(err)
+      throw Error("Failed to send mail", err.message)
     }
   }
 }
