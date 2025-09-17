@@ -27,7 +27,9 @@ export class UsersService {
     confirmPassword: string,
   ) {
     const exists = await this.prisma.user.findUnique({ where: { email } });
-    if (exists) throw new BadRequestException('Email already used');
+    if (exists) {
+      return exists.isEmailVerified
+    }
     const hashed = await bcrypt.hash(password, 10);
 
     if (password !== confirmPassword) {
