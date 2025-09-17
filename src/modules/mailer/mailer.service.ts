@@ -18,7 +18,7 @@ export class MailerService {
 
   async sendVerificationEmail(email: string, code: string) {
     try {
-      return await this.transporter.sendMail({
+      return this.transporter.sendMail({
         from: `"Verify Email" <${this.config.getOrThrow('SMTP_USER')}>`,
         to: email,
         subject: 'Email Verification Code',
@@ -34,7 +34,7 @@ export class MailerService {
 
   async sendPasswordResetEmail(email: string, code: string) {
     try {
-      return await this.transporter.sendMail({
+      return this.transporter.sendMail({
         from: `"Reset Password" <${this.config.getOrThrow('SMTP_USER')}>`,
         to: email,
         subject: 'Password Reset Code',
