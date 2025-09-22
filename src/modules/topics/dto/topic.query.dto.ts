@@ -3,8 +3,8 @@ import { IsOptional, IsString } from "class-validator";
 
 export class QueryTopicDto {
   @ApiPropertyOptional({
-    description: 'Search keyword (topic name, reference, or content)',
-    example: 'law',
+    description: "Search keyword (topic name, reference, or content)",
+    example: "law",
   })
   @IsOptional()
   @IsString()

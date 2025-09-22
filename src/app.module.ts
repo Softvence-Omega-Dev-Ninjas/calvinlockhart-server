@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common';
-import { PrismaModule } from './modules/prisma/prisma.module';
-import { UsersModule } from './modules/users/users.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { MailerModule } from './modules/mailer/mailer.module';
-import { ConfigModule } from '@nestjs/config';
-import { TopicsModule } from './modules/topics/topics.module';
-import { BiblesGroupModule } from './modules/bibles/bibles.group.module';
-import { NotesModule } from './modules/note/note.module';
+import { Module } from "@nestjs/common";
+import { PrismaModule } from "./modules/prisma/prisma.module";
+import { UsersModule } from "./modules/users/users.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { MailerModule } from "./modules/mailer/mailer.module";
+import { ConfigModule } from "@nestjs/config";
+import { TopicsModule } from "./modules/topics/topics.module";
+import { BiblesGroupModule } from "./modules/bibles/bibles.group.module";
+import { NotesModule } from "./modules/note/note.module";
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { NotesModule } from './modules/note/note.module';
     MailerModule,
     BiblesGroupModule,
     TopicsModule,
-    NotesModule
+    NotesModule,
   ],
 })
 export class AppModule {}

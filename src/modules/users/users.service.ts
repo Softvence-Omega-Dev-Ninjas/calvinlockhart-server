@@ -3,37 +3,32 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcryptjs';
-import { UpdateUserDto } from './dto/users.update.dto';
-import { v2 as cloudinary } from 'cloudinary'; // Import configured cloudinary instance
-import streamifier from 'streamifier'
-
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import * as bcrypt from "bcryptjs";
+import { UpdateUserDto } from "./dto/users.update.dto";
+import { v2 as cloudinary } from "cloudinary"; // Import configured cloudinary instance
+import streamifier from "streamifier";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true, // Recommended for HTTPS URLs
-})
+});
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async createUser(
-    email: string,
-    password: string,
-    confirmPassword: string,
-  ) {
+  async createUser(email: string, password: string, confirmPassword: string) {
     const exists = await this.prisma.user.findUnique({ where: { email } });
     if (exists) {
-      return exists.isEmailVerified
+      return exists.isEmailVerified;
     }
     const hashed = await bcrypt.hash(password, 10);
 
     if (password !== confirmPassword) {
-      throw new BadRequestException('Please Provide Valid Credentials.');
+      throw new BadRequestException("Please Provide Valid Credentials.");
     }
     return this.prisma.user.create({
       data: { email, password: hashed },
@@ -55,14 +50,20 @@ export class UsersService {
     });
   }
 
-  async updatePassword(userId: string, oldPassword: string, newPassword: string) {
-    const user = await this.prisma.user.findFirst({ where: { id: userId } })
+  async updatePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException("User Not found")
+      throw new NotFoundException("User Not found");
     }
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials Old Password is Invalide');
+      throw new UnauthorizedException(
+        "Invalid credentials Old Password is Invalide",
+      );
     }
     const hashed = await bcrypt.hash(newPassword, 10);
     return this.prisma.user.update({
@@ -79,8 +80,6 @@ export class UsersService {
     });
   }
 
-
-
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException(`User with ID ${id} not found`);
@@ -96,7 +95,7 @@ export class UsersService {
       where: { email },
     });
     if (!user) {
-      throw new NotFoundException('Unvalid User');
+      throw new NotFoundException("Unvalid User");
     }
     return user;
   }
@@ -107,7 +106,7 @@ export class UsersService {
       where: { email },
     });
     if (!user) {
-      throw new NotFoundException('User is Not found');
+      throw new NotFoundException("User is Not found");
     }
     return this.prisma.user.update({
       where: { email },
@@ -122,13 +121,11 @@ export class UsersService {
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
+        },
       );
 
       // Convert buffer → stream and pipe it to Cloudinary
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
-
   }
-
 }

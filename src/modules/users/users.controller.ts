@@ -1,50 +1,65 @@
-import { Body, ConflictException, Controller, Get, Param, Put, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { apiBodyExample, UpdateUserDto } from './dto/users.update.dto';
-import { handleRequest } from 'src/common/utils/request.handler';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/common/guards/jwt.guards';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  Body,
+  ConflictException,
+  Controller,
+  Get,
+  Put,
+  Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { UpdateUserDto } from "./dto/users.update.dto";
+import { handleRequest } from "src/common/utils/request.handler";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "src/common/guards/jwt.guards";
+import { FileInterceptor } from "@nestjs/platform-express";
 
-
-@ApiTags('Users')
-@ApiBearerAuth('JWT-auth')
+@ApiTags("Users")
+@ApiBearerAuth("JWT-auth")
 @UseGuards(JwtAuthGuard)
-@Controller('users')
+@Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
-  // Todo convert user login.... 
+  // Todo convert user login....
   @ApiOperation({ summary: "Show user own information" })
-  @Get('/me')
+  @Get("/me")
   async findOne(@Request() req) {
-    const email = req.user.email
+    const email = req.user.email;
     return handleRequest(
       () => this.usersService.findOne(email),
-      'User fetched successfully',
+      "User fetched successfully",
     );
   }
 
   // @UseInterceptors(FileInterceptor('userAvatar', { storage }))
   @ApiOperation({ summary: "Update user information" })
-  @Put('/updateMe')
+  @Put("/updateMe")
   @ApiConsumes("multipart/form-data")
   @ApiBody({ type: UpdateUserDto, required: false })
-  @UseInterceptors(FileInterceptor('file')) // 'image' is the name of the form field
-  async updateUser(@Request() req, @Body() dto: UpdateUserDto, @UploadedFile() file?: Express.Multer.File) {
-    const email = req.user.email
-    console.log(file)
+  @UseInterceptors(FileInterceptor("file")) // 'image' is the name of the form field
+  async updateUser(
+    @Request() req,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const email = req.user.email;
     if (file) {
-      const { secure_url }: any = await this.usersService.uploadImages(file)
-      if (!secure_url) throw new ConflictException("not found")
-      console.log(secure_url)
-      dto["userAvatar"] = secure_url
+      const { secure_url }: any = await this.usersService.uploadImages(file);
+      if (!secure_url) throw new ConflictException("not found");
+      dto["userAvatar"] = secure_url;
     }
-
-
     return handleRequest(
       () => this.usersService.updateUser(email, dto),
-      'User updated successfully',
+      "User updated successfully",
     );
   }
 }

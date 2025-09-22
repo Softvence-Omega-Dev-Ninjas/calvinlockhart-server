@@ -1,8 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcryptjs';
-import { addMinutes } from 'date-fns';
-import { VerificationType } from '@prisma/client';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import * as bcrypt from "bcryptjs";
+import { addMinutes } from "date-fns";
+import { VerificationType } from "@prisma/client";
 
 @Injectable()
 export class TokenService {
@@ -28,7 +28,7 @@ export class TokenService {
   ) {
     const tokens = await this.prisma.verificationToken.findMany({
       where: { userId, type, used: false, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
     for (const t of tokens) {
       const ok = await bcrypt.compare(rawToken, t.token);
@@ -40,6 +40,6 @@ export class TokenService {
         return t;
       }
     }
-    throw new BadRequestException('Invalid or expired code');
+    throw new BadRequestException("Invalid or expired code");
   }
 }
