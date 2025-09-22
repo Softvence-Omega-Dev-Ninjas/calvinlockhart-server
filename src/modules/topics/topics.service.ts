@@ -41,7 +41,11 @@ export class TopicsService {
   async findAll(userId: string) {
     return this.prisma.topic.findMany({
       where: { userId },
-      include: { precepts: true },
+      include: { precepts: {
+        include:{
+          notes:true
+        }
+      } },
     });
   }
 
@@ -57,7 +61,11 @@ export class TopicsService {
     }
     return this.prisma.topic.findFirst({
       where: { id, userId },
-      include: { precepts: true, notes: true },
+      include: { precepts: {
+        include:{
+          notes:true
+        }
+      }},
     });
   }
   // precepts topic

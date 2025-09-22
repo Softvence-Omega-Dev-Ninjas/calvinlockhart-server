@@ -11,18 +11,18 @@ export class NotesService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId, dto: CreateNoteDto) {
-    const { topicId, description } = dto;
+    const { preceptId, description } = dto;
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!user) throw new BadRequestException("Unauthorized Access");
     // Verify topic exists
-    const topic = await this.prisma.topic.findUnique({
-      where: { id: topicId },
+    const topic = await this.prisma.precept.findUnique({
+      where: { id: preceptId },
     });
     if (!topic) throw new NotFoundException("Topic not found");
 
     return this.prisma.note.create({
       data: {
-        topicId: topicId,
+        preceptId:preceptId,
         description: description || "",
       },
     });

@@ -12,7 +12,7 @@ export class CreateNoteDto {
 
   @ApiPropertyOptional({ description: "Topic ID to link the note to" })
   @IsString()
-  topicId: string;
+  preceptId: string;
 }
 
 export class UpdateNoteDto {
