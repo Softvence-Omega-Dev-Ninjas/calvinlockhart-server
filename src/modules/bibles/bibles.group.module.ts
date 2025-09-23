@@ -7,6 +7,7 @@ import { KjvcpBiblesModule } from "./kjvcp-bibles/kjvcp.bibles.module";
 import { RecommendedBooksModule } from "./recomendedBook/recomdedBook.module";
 import { RandomContentModule } from "./precept/precept.module";
 import { SpanishModule } from "./spanish/spanish.module";
+import { StrongsKJVModule } from "./strongs-kjv/strongs-kjv.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SpanishModule } from "./spanish/spanish.module";
     RecommendedBooksModule,
     RandomContentModule,
     SpanishModule,
+    StrongsKJVModule
   ],
   providers: [],
   controllers: [],
