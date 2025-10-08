@@ -1,73 +1,52 @@
 services:
-  app:
+  server:
+    image: sajibsv/calvinlockhart_server:latest
     platform: linux/amd64
-    image: ${DOCKER_USERNAME}/${PACKAGE_NAME}:${PACKAGE_VERSION}
-    container_name: ${PACKAGE_NAME}_api
-    ports:
-      - '${PORT}:${PORT}'
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+    container_name: calvinlockhart_api
     restart: always
-    healthcheck:
-      disable: true
+    build:
+      context: .
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/calvinlockhart_db
+
+      JWT_SECRET: your_super_secret_here
+      JWT_EXPIRES_IN: 90d
+      RESET_TOKEN_EXPIRES_SECONDS: 900
+
+      OTP_EXPIRES_MINUTES: 10
+
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 465
+
+      SMTP_USER: Ctlockhart@gmail.com
+      SMTP_PASS: wyue diwj bjff gezi
+
+      CLOUDINARY_CLOUD_NAME: dxkov6k4k
+      CLOUDINARY_API_KEY: 224666147412464
+      CLOUDINARY_API_SECRET: zKtjdPv-kFsKoIQKlalvP9GDmRM
+
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
     command: >
       sh -c "
         npx prisma migrate deploy &&
-        pnpm start
+        npm run start:prod
       "
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
 
   db:
     image: postgres
-    container_name: ${PG_DATABASE}
+    container_name: calvinlockhart_db
     restart: always
     environment:
-      POSTGRES_USER: ${PG_USERNAME}
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
-      POSTGRES_DB: ${PG_DATABASE}
-      POSTGRES_SHARED_PRELOAD_LIBRARIES: pg_stat_statements
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calvinlockhart_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - calvinlockhart_db:/var/lib/postgresql/data
     ports:
-      - '${PG_PORT}:${PG_PORT}'
-    healthcheck:
-      test:
-        ['CMD', 'pg_isready', '-U', '${PG_USERNAME}', '-d', '${PG_DATABASE}']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 15s
-
-  redis:
-    image: redis
-    container_name: ${REDIS_CONTAINER}
-    restart: always
-    ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 5s
+      - '5404:5432'
 
 volumes:
-  postgres_data:
-  redis_data:
-
-networks:
-  default:
-    name: ${PACKAGE_NAME}_network
-    labels:
-      - 'project=${PACKAGE_NAME}'
+  calvinlockhart_db:

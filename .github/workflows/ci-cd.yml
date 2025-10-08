@@ -13,24 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: ⚙️ Set up Node
+      - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '24'
 
-      - name: 📦 Install dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: npm install
 
-      - name: 🛠 Lint Vite App
+      - name: Lint Vite App
         run: npm run lint
 
-      - name: 🛠 Format Vite  App
+      - name: Format Vite  App
         run: npm run format
 
-      - name: 🛠 Build Vite App
+      - name: Build Vite App
         run: npm run build
 
   build-and-push:
@@ -57,7 +57,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/bbehmer-frontend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/calvinlockhart-server:latest
 
   deploy:
     name: Deploy to VPS
@@ -76,7 +76,7 @@ jobs:
           username: root
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd /root/frontend
+            cd /root/backend
             docker compose down --remove-orphans
             docker compose rm -f
             docker compose pull
