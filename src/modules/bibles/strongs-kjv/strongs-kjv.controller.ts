@@ -8,7 +8,7 @@ export class StrongsKJVController {
   @Get()
   getAll(
     @Query("page", new ParseIntPipe({ optional: true })) page = 1,
-    @Query("limit", new ParseIntPipe({ optional: true })) limit = 100
+    @Query("limit", new ParseIntPipe({ optional: true })) limit = 100,
   ): StrongsEntryResponse[] {
     return this.service.findAll(page, limit);
   }

@@ -1,0 +1,51 @@
+services:
+  server:
+    image: sajibsv/calvinlockhart_server:latest
+    platform: linux/amd64
+    container_name: calvinlockhart_api
+    restart: always
+    build:
+      context: .
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/calvinlockhart_db
+
+      JWT_SECRET: your_super_secret_here
+      JWT_EXPIRES_IN: 90d
+      RESET_TOKEN_EXPIRES_SECONDS: 900
+
+      OTP_EXPIRES_MINUTES: 10
+
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: 465
+
+      SMTP_USER: Ctlockhart@gmail.com
+      SMTP_PASS: wyue diwj bjff gezi
+
+      CLOUDINARY_CLOUD_NAME: dxkov6k4k
+      CLOUDINARY_API_KEY: 224666147412464
+      CLOUDINARY_API_SECRET: zKtjdPv-kFsKoIQKlalvP9GDmRM
+    ports:
+      - '5000:5000'
+    depends_on:
+      - db
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npm run start:prod
+      "
+
+  db:
+    image: postgres
+    container_name: calvinlockhart_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: calvinlockhart_db
+    volumes:
+      - calvinlockhart_db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+volumes:
+  calvinlockhart_db:

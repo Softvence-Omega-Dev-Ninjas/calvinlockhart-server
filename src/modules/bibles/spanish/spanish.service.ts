@@ -82,6 +82,7 @@ export class SpanishService {
     // __dirname points to dist/... after build
     const filePath = path.join(__dirname, "db", book);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const bookModule = require(filePath); // Node will load default export
       return bookModule.default ?? bookModule; // handle default export
     } catch (err) {

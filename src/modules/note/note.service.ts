@@ -22,7 +22,7 @@ export class NotesService {
 
     return this.prisma.note.create({
       data: {
-        preceptId:preceptId,
+        preceptId: preceptId,
         description: description || "",
       },
     });
