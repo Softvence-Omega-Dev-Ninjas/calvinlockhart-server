@@ -1,6 +1,6 @@
 services:
   server:
-    image: sajibsv/calvinlockhart_server:latest
+    image: sajibsv/calvinlockhart-server:latest
     platform: linux/amd64
     container_name: calvinlockhart_api
     restart: always
