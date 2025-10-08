@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException, OnModuleInit } from "@nestjs/common";
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+} from "@nestjs/common";
 import * as fs from "fs";
 import * as path from "path";
-import { convert } from "./utils/convert-strongs";
 
 export interface StrongsEntryResponse {
   strongs: string;
@@ -20,6 +24,7 @@ export interface StrongsEntryResponse {
 
 @Injectable()
 export class StrongsKJVService implements OnModuleInit {
+  private logger = new Logger(StrongsKJVService.name);
   private strongsData: Map<string, StrongsEntryResponse> = new Map();
 
   async onModuleInit() {
@@ -28,7 +33,7 @@ export class StrongsKJVService implements OnModuleInit {
     const filePath = path.join("data", "strongs-greek-dictionary.json");
     if (!fs.existsSync(filePath)) {
       throw new Error(
-        `JSON file not found at ${filePath}. Make sure it exists and is copied to dist`
+        `JSON file not found at ${filePath}. Make sure it exists and is copied to dist`,
       );
     }
 
@@ -54,10 +59,12 @@ export class StrongsKJVService implements OnModuleInit {
           translit: entry?.greek?.$?.translit || "",
         },
         pronunciation: entry?.pronunciation?.$?.strongs || "",
-        derivation: typeof entry?.strongs_derivation === "string"
-          ? entry.strongs_derivation
-          : entry?.strongs_derivation?._ || "",
-        derivationRef: entry?.strongs_derivation?.strongsref?.$?.strongs || undefined,
+        derivation:
+          typeof entry?.strongs_derivation === "string"
+            ? entry.strongs_derivation
+            : entry?.strongs_derivation?._ || "",
+        derivationRef:
+          entry?.strongs_derivation?.strongsref?.$?.strongs || undefined,
         strongsDef: entry?.strongs_def || "",
         kjvDef: entry?.kjv_def || "",
         see: entry?.see?.$?.strongs || undefined,
@@ -70,7 +77,7 @@ export class StrongsKJVService implements OnModuleInit {
       throw new NotFoundException("No Strong's entries found");
     }
 
-    console.log(`✅ Loaded ${this.strongsData.size} Strong's entries`);
+    this.logger.log(`✅ Loaded ${this.strongsData.size} Strong's entries`);
   }
 
   // Fetch all entries (paginated)

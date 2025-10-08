@@ -3,80 +3,73 @@ import path from "path";
 import { parseStringPromise } from "xml2js";
 
 // Define the structure of a single XML entry
-interface StrongsEntry {
-    $: { id: string };
+export interface StrongsEntry {
+  $: { id: string };
+  lemma?: string;
+  translit?: string;
+  pron?: string;
+  definition?: string;
+  usage?: string;
+}
+
+// Define the dictionary type
+export interface StrongsDictionary {
+  [id: string]: {
+    strongs: string;
     lemma?: string;
     translit?: string;
     pron?: string;
     definition?: string;
     usage?: string;
-}
-
-// Define the dictionary type
-interface StrongsDictionary {
-    [id: string]: {
-        strongs: string;
-        lemma?: string;
-        translit?: string;
-        pron?: string;
-        definition?: string;
-        usage?: string;
-    };
+  };
 }
 
 export async function convert(): Promise<void> {
-    try {
-        // Path to your XML file
-        const xmlFilePath = path.join(
-            "data",
-            "strongsgreek.xml"
-        );
-    
+  try {
+    // Path to your XML file
+    const xmlFilePath = path.join("data", "strongsgreek.xml");
 
-        const xml = fs.readFileSync(xmlFilePath, "utf8");
+    const xml = fs.readFileSync(xmlFilePath, "utf8");
 
-        // Parse XML to JS object
-        const result = await parseStringPromise(xml, { explicitArray: false });
-        // console.log("Parsed XML structure:", JSON.stringify(result, null, 2));
+    // Parse XML to JS object
+    const result = await parseStringPromise(xml, { explicitArray: false });
+    // console.log("Parsed XML structure:", JSON.stringify(result, null, 2));
 
-        // // Access entries (adjust path based on XML structure)
-        // let entries: StrongsEntry[] | StrongsEntry | undefined =
-        //     result?.lexicon?.entry;
+    // // Access entries (adjust path based on XML structure)
+    // let entries: StrongsEntry[] | StrongsEntry | undefined =
+    //     result?.lexicon?.entry;
 
-        // if (!entries) {
-        //     console.error("❌ No entries found in XML!");
-        //     return;
-        // }
+    // if (!entries) {
+    //     console.error("❌ No entries found in XML!");
+    //     return;
+    // }
 
-        // // Ensure entries is always an array
-        // if (!Array.isArray(entries)) entries = [entries];
+    // // Ensure entries is always an array
+    // if (!Array.isArray(entries)) entries = [entries];
 
-        // const dictionary: StrongsDictionary = {};
+    // const dictionary: StrongsDictionary = {};
 
-        // for (const entry of entries) {
-        //     const id = entry.$?.id;
-        //     if (!id) continue;
+    // for (const entry of entries) {
+    //     const id = entry.$?.id;
+    //     if (!id) continue;
 
-        //     dictionary[id] = {
-        //         strongs: id,
-        //         lemma: entry.lemma,
-        //         translit: entry.translit,
-        //         pron: entry.pron,
-        //         definition: entry.definition,
-        //         usage: entry.usage,
-        //     };
-        // }
+    //     dictionary[id] = {
+    //         strongs: id,
+    //         lemma: entry.lemma,
+    //         translit: entry.translit,
+    //         pron: entry.pron,
+    //         definition: entry.definition,
+    //         usage: entry.usage,
+    //     };
+    // }
 
-        // Output JSON file
-        const jsonFilePath = path.join(
-            "data",
-            "strongs-greek-dictionary.json"
-        );
+    // Output JSON file
+    const jsonFilePath = path.join("data", "strongs-greek-dictionary.json");
 
-        fs.writeFileSync(jsonFilePath, JSON.stringify(result, null, 2), "utf8");
-    } catch (err) {
-        console.error("❌ Error converting XML to JSON:", err);
-    }
+    fs.writeFileSync(jsonFilePath, JSON.stringify(result, null, 2), "utf8");
+  } catch (err) {
+    console.error("❌ Error converting XML to JSON:", err);
+  }
 }
 
 // import fs from "fs";
@@ -156,4 +149,3 @@ export async function convert(): Promise<void> {
 //     console.error("❌ Error converting XML to JSON:", err.message || err);
 //   }
 // }
-

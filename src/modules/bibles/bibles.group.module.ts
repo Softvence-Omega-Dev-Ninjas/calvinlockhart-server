@@ -17,7 +17,7 @@ import { StrongsKJVModule } from "./strongs-kjv/strongs-kjv.module";
     RecommendedBooksModule,
     RandomContentModule,
     SpanishModule,
-    StrongsKJVModule
+    StrongsKJVModule,
   ],
   providers: [],
   controllers: [],
