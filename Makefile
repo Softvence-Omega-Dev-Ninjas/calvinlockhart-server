@@ -1,5 +1,5 @@
 # Docker image name
-APP_IMAGE := sajibsv/calvinlockhart_server:latest
+APP_IMAGE := sajibsv/calvinlockhart-server:latest
 
 # Compose file
 COMPOSE_FILE := compose.yaml
