@@ -24,9 +24,8 @@ services:
       CLOUDINARY_CLOUD_NAME: dxkov6k4k
       CLOUDINARY_API_KEY: 224666147412464
       CLOUDINARY_API_SECRET: zKtjdPv-kFsKoIQKlalvP9GDmRM
-
     ports:
-      - '3000:3000'
+      - '5000:5000'
     depends_on:
       - db
     command: >
@@ -46,7 +45,7 @@ services:
     volumes:
       - calvinlockhart_db:/var/lib/postgresql/data
     ports:
-      - '5404:5432'
+      - '5432:5432'
 
 volumes:
   calvinlockhart_db:
