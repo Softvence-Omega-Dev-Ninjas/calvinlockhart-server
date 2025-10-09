@@ -4,8 +4,6 @@ services:
     platform: linux/amd64
     container_name: calvinlockhart_api
     restart: always
-    build:
-      context: .
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/calvinlockhart_db
 
@@ -18,8 +16,8 @@ services:
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 465
 
-      SMTP_USER: Ctlockhart@gmail.com
-      SMTP_PASS: wyue diwj bjff gezi
+      SMTP_USER: ctlockhart@gmail.com
+      SMTP_PASS: wyuediwjbjffgezi
 
       CLOUDINARY_CLOUD_NAME: dxkov6k4k
       CLOUDINARY_API_KEY: 224666147412464

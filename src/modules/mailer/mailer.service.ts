@@ -8,10 +8,15 @@ export class MailerService {
 
   constructor(private readonly config: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // use STARTTLS, not SSL
       auth: {
         user: this.config.getOrThrow("SMTP_USER"),
         pass: this.config.getOrThrow("SMTP_PASS"),
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
   }
