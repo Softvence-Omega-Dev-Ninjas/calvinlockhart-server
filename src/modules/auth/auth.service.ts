@@ -31,11 +31,17 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("Invalid credentials");
+<<<<<<< HEAD
 
     // if (!user.isEmailVerified) {
     //   throw new BadRequestException('Please Verify your Email.');
     // }
     
+=======
+    if (!user.isEmailVerified) {
+      throw new BadRequestException("Please Verify your Email.");
+    }
+>>>>>>> 958d8b7a344cd66b0a3135a5b7bff4aafb40cb16
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(

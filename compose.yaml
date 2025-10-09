@@ -4,8 +4,6 @@ services:
     platform: linux/amd64
     container_name: calvinlockhart_api
     restart: always
-    build:
-      context: .
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/calvinlockhart_db
 
@@ -13,13 +11,13 @@ services:
       JWT_EXPIRES_IN: 90d
       RESET_TOKEN_EXPIRES_SECONDS: 900
 
-      OTP_EXPIRES_MINUTES: 10
+      OTP_EXPIRES_MINUTES: 5
 
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 465
 
-      SMTP_USER: Ctlockhart@gmail.com
-      SMTP_PASS: wyue diwj bjff gezi
+      SMTP_USER: ctlockhart@gmail.com
+      SMTP_PASS: wyuediwjbjffgezi
 
       CLOUDINARY_CLOUD_NAME: dxkov6k4k
       CLOUDINARY_API_KEY: 224666147412464
@@ -27,9 +25,11 @@ services:
     ports:
       - '5000:5000'
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: >
       sh -c "
+        echo '⏳ Waiting for database to be ready...' &&
         npx prisma migrate deploy &&
         npm run start:prod
       "
@@ -46,6 +46,11 @@ services:
       - calvinlockhart_db:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d calvinlockhart_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
   calvinlockhart_db:
