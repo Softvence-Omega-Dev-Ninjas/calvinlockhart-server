@@ -15,7 +15,7 @@
     "preview": "vite preview",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|jsx|tsx|mjs)\"",
     "format:fix": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json|jsx|tsx|mjs)\"",
-    "ci:check": "npm run format && npm run lint && npm run build && npm run start",
+    "ci:check": "npm run format && npm run lint && npm run build && npm run start:prod",
     "ci:fix": "npm run format:fix && npm run lint:fix",
     "postinstall": "npx prisma generate",
     "prepare": "husky"

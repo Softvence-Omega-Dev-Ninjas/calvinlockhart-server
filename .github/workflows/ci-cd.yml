@@ -24,13 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Lint Vite App
+      - name: Lint App
         run: npm run lint
 
-      - name: Format Vite  App
+      - name: Format  App
         run: npm run format
 
-      - name: Build Vite App
+      - name: Build App
         run: npm run build
 
   build-and-push:
