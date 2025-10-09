@@ -31,9 +31,9 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("Invalid credentials");
-    // if (!user.isEmailVerified) {
-    //   throw new BadRequestException('Please Verify your Email.');
-    // }
+    if (!user.isEmailVerified) {
+      throw new BadRequestException('Please Verify your Email.');
+    }
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(
@@ -51,7 +51,7 @@ export class AuthService {
       user.id,
       code,
       type,
-      Number(this.config.get("OTP_EXPIRES_MINUTES") || 10),
+      Number(this.config.get("OTP_EXPIRES_MINUTES") || 5),
     );
     if (type === VerificationType.PASSWORD_RESET) {
       await this.mailer.sendPasswordResetEmail(email, code);
