@@ -33,15 +33,10 @@ export class AuthService {
     if (!user) throw new UnauthorizedException("Invalid credentials");
 
 
-    if (!user.isEmailVerified) {
-      throw new BadRequestException('Please Verify your Email.');
-    }
-    
-
-    if (!user.isEmailVerified) {
-      throw new BadRequestException("Please Verify your Email.");
-    }
-
+    // if (!user.isEmailVerified) {
+    //   throw new BadRequestException('Please Verify your Email.');
+    // }
+  
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(
