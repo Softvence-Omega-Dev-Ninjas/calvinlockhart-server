@@ -30,7 +30,8 @@ services:
     command: >
       sh -c "
         echo '⏳ Waiting for database to be ready...' &&
-        npx prisma migrate deploy &&
+        npx prisma migrate deploy || (echo '❌ Migration failed' && exit 1) &&
+        npx prisma generate &&
         npm run start:prod
       "
 
