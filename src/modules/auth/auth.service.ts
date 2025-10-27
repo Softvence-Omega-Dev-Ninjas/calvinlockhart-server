@@ -35,7 +35,7 @@ export class AuthService {
     // if (!user.isEmailVerified) {
     //   throw new BadRequestException('Please Verify your Email.');
     // }
-
+  
     const ok = await bcrypt.compare(password, user.password);
     if (!ok)
       throw new UnauthorizedException(
@@ -80,6 +80,7 @@ export class AuthService {
     }
     return { message: "OK" };
   }
+
   // reset password...
   async resetPassword(
     userId: string,
@@ -90,9 +91,11 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("Unauthorized Access");
     }
-    if (!user.isEmailVerified) {
-      throw new BadRequestException("Please Verify your Email.");
-    }
+
+    // if (!user.isEmailVerified) {
+    //   throw new BadRequestException("Please Verify your Email.");
+    // }
+
     return this.users.updatePassword(userId, oldPassword, newPassword);
   }
 
