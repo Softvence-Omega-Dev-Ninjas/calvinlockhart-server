@@ -1,6 +1,6 @@
 services:
   server:
-    image: sajibsv/calvinlockhart-server:latest
+    image: softvence/calvinlockhart-server:latest
     platform: linux/amd64
     container_name: calvinlockhart_api
     restart: always
@@ -35,7 +35,7 @@ services:
       "
 
   db:
-    image: postgres
+    image: postgres:17
     container_name: calvinlockhart_db
     restart: always
     environment:
