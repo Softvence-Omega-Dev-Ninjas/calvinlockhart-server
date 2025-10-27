@@ -21,7 +21,7 @@ services:
 
       CLOUDINARY_CLOUD_NAME: dxkov6k4k
       CLOUDINARY_API_KEY: 224666147412464
-      CLOUDINARY_API_SECRET: zKtjdPv-kFsKoIQKlalvP9GDmRM
+      CLOUDINARY_API_SECRET: zKtjdPv-kFsKolQKlalvP9GDmRM
     ports:
       - '5000:5000'
     depends_on:
