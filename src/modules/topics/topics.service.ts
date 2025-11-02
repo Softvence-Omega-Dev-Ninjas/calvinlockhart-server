@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { CreateTopicDto } from "./dto/create.topic.dto";
+import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { AddPreceptsDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
 
@@ -229,26 +229,35 @@ export class TopicsService {
     return null;
   }
   // update topic
-  async updateTopic(userId: string, id: string, dto: CreateTopicDto) {
-    const topic = await this.prisma.topic.findUnique({ where: { id } });
+  async patchUpdateTopic(userId: string, id: string, dto: UpdateTopicDto) {
+    const topic = await this.prisma.topic.findUnique({
+      where: { id },
+      include: { precepts: true },
+    });
+
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException("Not allowed to update this topic");
     }
 
+    // Build dynamic update data only for provided fields
+    const updateData: any = {};
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.destination !== undefined) updateData.destination = dto.destination;
+
+    // Handle nested precepts update if provided
+    if (dto.precepts?.length) {
+      updateData.precepts = {
+        deleteMany: {}, // remove existing precepts
+        create: dto.precepts.map((p) => ({
+          reference: p.reference,
+          content: p.content,
+        })),
+      };
+    }
+
     return this.prisma.topic.update({
       where: { id },
-      data: {
-        name: dto.name,
-        destination: dto.destination,
-        precepts: {
-          deleteMany: {},
-          create:
-            dto.precepts?.map((p) => ({
-              reference: p.reference,
-              content: p.content,
-            })) || [],
-        },
-      },
+      data: updateData,
       include: { precepts: true },
     });
   }
@@ -277,5 +286,33 @@ export class TopicsService {
       ),
     );
     return { message: "Precepts added successfully", precepts };
+  }
+
+  async removePrecept(userId: string, preceptId: string) {
+    // Find the precept and include its related topic to verify ownership
+    const precept = await this.prisma.precept.findUnique({
+      where: { id: preceptId },
+      include: { topic: true },
+    });
+
+    //  Handle not found
+    if (!precept) {
+      throw new NotFoundException("Precept not found");
+    }
+
+    //  Ensure the user owns the topic related to this precept
+    if (precept.topic.userId !== userId) {
+      throw new ForbiddenException(
+        "You are not allowed to delete this precept",
+      );
+    }
+
+    //  Perform delete
+    await this.prisma.precept.delete({
+      where: { id: preceptId },
+    });
+
+    //  Return response
+    return { message: "Precept deleted successfully", preceptId };
   }
 }

@@ -1,7 +1,9 @@
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
+  IsString,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
@@ -54,6 +56,35 @@ export class CreateTopicDto {
     ],
   })
   @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => CreatePreceptDto)
+  precepts?: CreatePreceptDto[];
+}
+
+export class UpdateTopicDto {
+  @ApiPropertyOptional({
+    example: "Faith and Hope",
+    description: "Updated topic name",
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({
+    enum: TopicDestination,
+    example: TopicDestination.PRECEPT_TOPIC,
+    description: "Updated destination value",
+  })
+  @IsOptional()
+  @IsEnum(TopicDestination)
+  destination?: TopicDestination;
+
+  @ApiPropertyOptional({
+    type: [CreatePreceptDto],
+    description: "Optional list of precepts to replace existing ones",
+  })
+  @IsOptional()
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreatePreceptDto)
   precepts?: CreatePreceptDto[];

@@ -4,14 +4,14 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
   Request,
   UseGuards,
 } from "@nestjs/common";
 import { TopicsService } from "./topics.service";
-import { CreateTopicDto } from "./dto/create.topic.dto";
+import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { handleRequest } from "src/common/utils/request.handler";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/common/guards/jwt.guards";
@@ -94,17 +94,18 @@ export class TopicsController {
   }
 
   // Update Topic
-  @Put(":topicId")
-  @ApiOperation({ summary: "Update Topic" })
-  update(
+  @Patch(":topicId")
+  @ApiOperation({ summary: "Partially Update Topic" })
+  async patchUpdate(
     @Param("topicId") topicId: string,
     @Request() req,
-    @Body() dto: CreateTopicDto,
+    @Body() dto: UpdateTopicDto,
   ) {
     const userId = req.user.sub;
+
     return handleRequest(
-      () => this.service.updateTopic(userId, topicId, dto),
-      "Update Topic successfully",
+      () => this.service.patchUpdateTopic(userId, topicId, dto),
+      "Topic updated successfully",
     );
   }
 
@@ -120,6 +121,16 @@ export class TopicsController {
     return handleRequest(
       () => this.service.addPrecepts(userId, topicId, dto),
       "Added Another Precepts successfully",
+    );
+  }
+
+  @Delete("removePrecept/:preceptId")
+  @ApiOperation({ summary: "delete indiviual precepts" })
+  async removePrecept(@Param("preceptId") preceptId: string, @Request() req) {
+    const userId = req.user.sub;
+    return handleRequest(
+      () => this.service.removePrecept(userId, preceptId),
+      "remove Precepts successfully",
     );
   }
 }

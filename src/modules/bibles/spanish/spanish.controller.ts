@@ -24,7 +24,7 @@ export class SpanishController {
   }
 
   // GET /spanish/:book/chapter/:chapter/verse/:verse
-    @ApiOperation({ summary: "Get a Single book: judas, chapter: 1, verse: 1" })
+  @ApiOperation({ summary: "Get a Single book: judas, chapter: 1, verse: 1" })
   @Get(":book/chapter/:chapter/verse/:verse")
   getVerse(
     @Param("book") book: string,
