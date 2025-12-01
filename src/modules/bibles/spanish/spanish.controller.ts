@@ -6,6 +6,12 @@ import { ApiOperation } from "@nestjs/swagger";
 export class SpanishController {
   constructor(private readonly service: SpanishService) {}
 
+  // all books
+  @Get("books")
+  getAllBooks() {
+    return this.service.getAllBooks();
+  }
+
   // GET /spanish/:book
   @ApiOperation({ summary: "Get a Single book: judas" })
   @Get(":book")

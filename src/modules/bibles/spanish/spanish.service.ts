@@ -91,6 +91,10 @@ export class SpanishService {
     }
   }
 
+  getAllBooks() {
+    return books.map((b) => capitalizeFirst(b));
+  }
+
   getBook(book: string): IBookResponse {
     const db = this.getDb(book);
     return {
