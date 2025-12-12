@@ -43,6 +43,9 @@ export class TopicsService {
       where: { userId },
       include: {
         precepts: {
+          orderBy: {
+            reference: "asc",
+          },
           include: {
             notes: true,
           },
@@ -65,6 +68,9 @@ export class TopicsService {
       where: { id, userId },
       include: {
         precepts: {
+          orderBy: {
+            reference: "asc",
+          },
           include: {
             notes: true,
           },
