@@ -39,21 +39,21 @@ export class TopicsService {
   }
   //  find user all topics
   async findAll(userId: string) {
-    return this.prisma.topic.findMany({
+    const topics = await this.prisma.topic.findMany({
       where: { userId },
       include: {
         precepts: {
-          orderBy: {
-            reference: "asc",
-          },
-          include: {
-            notes: true,
-          },
+          orderBy: { reference: "asc" },
+          include: { notes: true },
         },
       },
     });
-  }
 
+    return topics.map((topic) => ({
+      ...topic,
+      precepts: this.groupPrecepts(topic.precepts),
+    }));
+  }
   // find topic
   async findOne(userId: string, id: string) {
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
@@ -119,17 +119,6 @@ export class TopicsService {
     if (!preceptTopic || preceptTopic.length === 0) {
       throw new NotFoundException("Precept Topic not found");
     }
-    // Shuffle topics randomly
-    // const shuffledTopics = preceptTopic.sort(() => 0.5 - Math.random());
-
-    // // For each topic, pick a random precept
-    // const result = shuffledTopics.map((topic) => {
-    //   const precepts = topic.precepts;
-    //   if (!precepts || precepts.length === 0) return { ...topic, randomPrecept: null };
-
-    //   const randomIndex = Math.floor(Math.random() * precepts.length);
-    //   return { ...topic, randomPrecept: precepts[randomIndex] };
-    // });
 
     return preceptTopic;
   }
@@ -244,16 +233,13 @@ export class TopicsService {
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException("Not allowed to update this topic");
     }
-
-    // Build dynamic update data only for provided fields
     const updateData: any = {};
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.destination !== undefined) updateData.destination = dto.destination;
 
-    // Handle nested precepts update if provided
     if (dto.precepts?.length) {
       updateData.precepts = {
-        deleteMany: {}, // remove existing precepts
+        deleteMany: {},
         create: dto.precepts.map((p) => ({
           reference: p.reference,
           content: p.content,
@@ -295,30 +281,51 @@ export class TopicsService {
   }
 
   async removePrecept(userId: string, preceptId: string) {
-    // Find the precept and include its related topic to verify ownership
     const precept = await this.prisma.precept.findUnique({
       where: { id: preceptId },
       include: { topic: true },
     });
 
-    //  Handle not found
     if (!precept) {
       throw new NotFoundException("Precept not found");
     }
-
-    //  Ensure the user owns the topic related to this precept
     if (precept.topic.userId !== userId) {
       throw new ForbiddenException(
         "You are not allowed to delete this precept",
       );
     }
-
-    //  Perform delete
     await this.prisma.precept.delete({
       where: { id: preceptId },
     });
 
-    //  Return response
     return { message: "Precept deleted successfully", preceptId };
+  }
+
+  private groupPrecepts(precepts: any[]) {
+    const map = new Map<string, any>();
+
+    for (const p of precepts) {
+      const [bookChapter, verse] = p.reference.split(":");
+
+      if (!map.has(bookChapter)) {
+        map.set(bookChapter, {
+          reference: bookChapter,
+          verses: [],
+          contents: [],
+          notes: [],
+        });
+      }
+
+      const group = map.get(bookChapter);
+
+      group.verses.push(verse);
+      group.contents.push(p.content);
+      group.notes.push(...p.notes);
+    }
+    return Array.from(map.values()).map((g) => ({
+      reference: `${g.reference}:${g.verses.join(",")}`,
+      contents: g.contents,
+      notes: g.notes,
+    }));
   }
 }
