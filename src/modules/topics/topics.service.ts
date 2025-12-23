@@ -302,30 +302,72 @@ export class TopicsService {
   }
 
   private groupPrecepts(precepts: any[]) {
-    const map = new Map<string, any>();
+    const map = new Map<
+      string,
+      {
+        bookChapter: string;
+        verses: number[];
+        contents: string[];
+        notes: any[];
+      }
+    >();
 
     for (const p of precepts) {
-      const [bookChapter, verse] = p.reference.split(":");
+      const [bookChapter, versePart] = p.reference.split(":");
+
+      let verses: number[] = [];
+
+      if (versePart.includes("-")) {
+        const [start, end] = versePart.split("-").map(Number);
+        for (let i = start; i <= end; i++) verses.push(i);
+      } else {
+        verses = versePart
+          .split(",")
+          .map((v) => parseInt(v.trim(), 10))
+          .filter(Boolean);
+      }
 
       if (!map.has(bookChapter)) {
         map.set(bookChapter, {
-          reference: bookChapter,
+          bookChapter,
           verses: [],
           contents: [],
           notes: [],
         });
       }
 
-      const group = map.get(bookChapter);
+      const group = map.get(bookChapter)!;
 
-      group.verses.push(verse);
-      group.contents.push(p.content);
-      group.notes.push(...p.notes);
+      group.verses.push(...verses);
+
+      // ✅ CONTENT FIX (MOST IMPORTANT PART)
+      if (Array.isArray(p.contents)) {
+        group.contents.push(...p.contents);
+      } else if (typeof p.content === "string") {
+        group.contents.push(p.content);
+      }
+
+      if (Array.isArray(p.notes)) {
+        group.notes.push(...p.notes);
+      }
     }
-    return Array.from(map.values()).map((g) => ({
-      reference: `${g.reference}:${g.verses.join(",")}`,
-      contents: g.contents,
-      notes: g.notes,
-    }));
+
+    return Array.from(map.values()).map((g) => {
+      const sortedVerses = Array.from(new Set<number>(g.verses)).sort(
+        (a, b) => a - b,
+      );
+
+      const minVerse = sortedVerses[0];
+      const maxVerse = sortedVerses[sortedVerses.length - 1];
+
+      return {
+        reference:
+          minVerse === maxVerse
+            ? `${g.bookChapter}:${minVerse}`
+            : `${g.bookChapter}:${minVerse}-${maxVerse}`,
+        contents: g.contents, // ✅ now SAME as old behavior
+        notes: g.notes,
+      };
+    });
   }
 }
