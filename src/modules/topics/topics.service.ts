@@ -302,15 +302,12 @@ export class TopicsService {
   }
 
   private groupPrecepts(precepts: any[]) {
-    const map = new Map<
-      string,
-      {
-        bookChapter: string;
-        verses: number[];
-        contents: string[];
-        notes: any[];
-      }
-    >();
+    const groups: {
+      bookChapter: string;
+      verses: number[];
+      contents: string[];
+      notes: any[];
+    }[] = [];
 
     for (const p of precepts) {
       const [bookChapter, versePart] = p.reference.split(":");
@@ -327,20 +324,27 @@ export class TopicsService {
           .filter(Boolean);
       }
 
-      if (!map.has(bookChapter)) {
-        map.set(bookChapter, {
+      verses.sort((a, b) => a - b);
+
+      let group = groups.find((g) => {
+        if (g.bookChapter !== bookChapter) return false;
+
+        const maxVerse = Math.max(...g.verses);
+        return verses[0] === maxVerse + 1;
+      });
+
+      if (!group) {
+        group = {
           bookChapter,
           verses: [],
           contents: [],
           notes: [],
-        });
+        };
+        groups.push(group);
       }
-
-      const group = map.get(bookChapter)!;
 
       group.verses.push(...verses);
 
-      // ✅ CONTENT FIX (MOST IMPORTANT PART)
       if (Array.isArray(p.contents)) {
         group.contents.push(...p.contents);
       } else if (typeof p.content === "string") {
@@ -352,10 +356,8 @@ export class TopicsService {
       }
     }
 
-    return Array.from(map.values()).map((g) => {
-      const sortedVerses = Array.from(new Set<number>(g.verses)).sort(
-        (a, b) => a - b,
-      );
+    return groups.map((g) => {
+      const sortedVerses = Array.from(new Set(g.verses)).sort((a, b) => a - b);
 
       const minVerse = sortedVerses[0];
       const maxVerse = sortedVerses[sortedVerses.length - 1];
@@ -365,7 +367,7 @@ export class TopicsService {
           minVerse === maxVerse
             ? `${g.bookChapter}:${minVerse}`
             : `${g.bookChapter}:${minVerse}-${maxVerse}`,
-        contents: g.contents, // ✅ now SAME as old behavior
+        contents: g.contents,
         notes: g.notes,
       };
     });
