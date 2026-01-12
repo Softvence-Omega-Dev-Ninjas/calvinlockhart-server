@@ -1,6 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsNotEmpty, ValidateNested } from "class-validator";
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from "class-validator";
 
 class CreatePreceptDto {
   @ApiProperty({
@@ -36,4 +41,22 @@ export class AddPreceptsDto {
   @ValidateNested({ each: true })
   @Type(() => CreatePreceptDto)
   precepts?: CreatePreceptDto[];
+}
+
+export class UpdatePreceptDto {
+  @ApiPropertyOptional({
+    example: "Matthew 4:4",
+    description: "Bible verse reference",
+  })
+  @IsOptional()
+  @IsString()
+  reference?: string;
+
+  @ApiPropertyOptional({
+    example: "Man shall not live on bread alone...",
+    description: "Verse content",
+  })
+  @IsOptional()
+  @IsString()
+  content?: string;
 }

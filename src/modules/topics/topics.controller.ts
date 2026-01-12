@@ -15,7 +15,7 @@ import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { handleRequest } from "src/common/utils/request.handler";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/common/guards/jwt.guards";
-import { AddPreceptsDto } from "./dto/create.precept.dto";
+import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
 
 @ApiTags("Topics")
@@ -131,6 +131,21 @@ export class TopicsController {
     return handleRequest(
       () => this.service.removePrecept(userId, preceptId),
       "remove Precepts successfully",
+    );
+  }
+
+  @Patch("updatePrecept/:preceptId")
+  @ApiOperation({ summary: "Update individual precept" })
+  async updatePrecept(
+    @Param("preceptId") preceptId: string,
+    @Request() req,
+    @Body() dto: UpdatePreceptDto,
+  ) {
+    const userId = req.user.sub;
+
+    return handleRequest(
+      () => this.service.updatePrecept(userId, preceptId, dto),
+      "Update Precepts successfully",
     );
   }
 }
