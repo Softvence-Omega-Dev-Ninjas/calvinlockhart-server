@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
-import { AddPreceptsDto } from "./dto/create.precept.dto";
+import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
 
 @Injectable()
@@ -371,5 +371,43 @@ export class TopicsService {
         notes: g.notes,
       };
     });
+  }
+
+  async updatePrecept(
+    userId: string,
+    preceptId: string,
+    dto: UpdatePreceptDto,
+  ) {
+    if (!dto.reference && !dto.content) {
+      throw new BadRequestException("Nothing to update");
+    }
+
+    const precept = await this.prisma.precept.findUnique({
+      where: { id: preceptId },
+      include: {
+        topic: true,
+      },
+    });
+
+    if (!precept) {
+      throw new NotFoundException("Precept not found");
+    }
+
+    if (precept.topic.userId !== userId) {
+      throw new ForbiddenException("Not allowed to update this precept");
+    }
+
+    const updatedPrecept = await this.prisma.precept.update({
+      where: { id: preceptId },
+      data: {
+        reference: dto.reference,
+        content: dto.content,
+      },
+    });
+
+    return {
+      message: "Precept updated successfully",
+      precept: updatedPrecept,
+    };
   }
 }
