@@ -237,20 +237,16 @@ export class TopicsService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.destination !== undefined) updateData.destination = dto.destination;
 
-    if (dto.precepts?.length) {
-      updateData.precepts = {
-        deleteMany: {},
-        create: dto.precepts.map((p) => ({
-          reference: p.reference,
-          content: p.content,
-        })),
-      };
-    }
-
     return this.prisma.topic.update({
       where: { id },
       data: updateData,
-      include: { precepts: true },
+      include: {
+        precepts: {
+          include: {
+            notes: true,
+          },
+        },
+      },
     });
   }
   // add precepts
