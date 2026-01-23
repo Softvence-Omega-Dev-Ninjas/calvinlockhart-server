@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -78,14 +77,4 @@ export class UpdateTopicDto {
   @IsOptional()
   @IsEnum(TopicDestination)
   destination?: TopicDestination;
-
-  @ApiPropertyOptional({
-    type: [CreatePreceptDto],
-    description: "Optional list of precepts to replace existing ones",
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreatePreceptDto)
-  precepts?: CreatePreceptDto[];
 }
