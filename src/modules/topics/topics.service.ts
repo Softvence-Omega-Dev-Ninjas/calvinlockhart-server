@@ -44,7 +44,6 @@ export class TopicsService {
       include: {
         precepts: {
           orderBy: { reference: "asc" },
-          include: { notes: true },
         },
       },
     });
@@ -249,30 +248,60 @@ export class TopicsService {
       },
     });
   }
-  // add precepts
+
   async addPrecepts(userId: string, topicId: string, dto: AddPreceptsDto) {
     const topic = await this.prisma.topic.findUnique({
       where: { id: topicId },
     });
+
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException("Not allowed to update this topic");
     }
+
     if (!dto.precepts?.length) {
       throw new BadRequestException("Precepts Data required.");
     }
+
+    const incomingRefs = dto.precepts
+      .map((p) => (p.reference ?? "").trim())
+      .filter(Boolean);
+
+    const dupInDto = incomingRefs.filter(
+      (r, i) => incomingRefs.indexOf(r) !== i,
+    );
+    if (dupInDto.length) {
+      throw new BadRequestException(
+        `Duplicate reference in request: ${[...new Set(dupInDto)].join(", ")}`,
+      );
+    }
+
+    const existing = await this.prisma.precept.findMany({
+      where: {
+        topicId,
+        reference: { in: incomingRefs },
+      },
+      select: { reference: true },
+    });
+
+    if (existing.length) {
+      throw new BadRequestException(
+        `This reference already exists in this topic: ${existing.map((e) => e.reference).join(", ")}`,
+      );
+    }
+
+    // create
     const precepts = await Promise.all(
       dto.precepts.map((p) =>
         this.prisma.precept.create({
           data: {
-            reference: p.reference,
+            reference: p.reference.trim(),
             content: p.content,
-            topic: {
-              connect: { id: topicId },
-            },
+            topic: { connect: { id: topicId } },
           },
         }),
       ),
     );
+
     return { message: "Precepts added successfully", precepts };
   }
 
@@ -297,7 +326,7 @@ export class TopicsService {
     return { message: "Precept deleted successfully", preceptId };
   }
 
-  private groupPrecepts(precepts: any[]) {
+  private groupPrecepts(precepts: any[] = []) {
     const groups: {
       bookChapter: string;
       verses: number[];
@@ -305,56 +334,72 @@ export class TopicsService {
       notes: any[];
     }[] = [];
 
-    for (const p of precepts) {
-      const [bookChapter, versePart] = p.reference.split(":");
+    for (const p of precepts ?? []) {
+      const ref = (p?.reference ?? "").toString().trim();
+
+      if (!ref.includes(":")) {
+        continue;
+      }
+
+      const [bookChapterRaw, versePartRaw] = ref.split(":");
+      const bookChapter = (bookChapterRaw ?? "").trim();
+      const versePart = (versePartRaw ?? "").trim();
+
+      if (!bookChapter || !versePart) continue;
 
       let verses: number[] = [];
 
+      // range: 16-18
       if (versePart.includes("-")) {
-        const [start, end] = versePart.split("-").map(Number);
-        for (let i = start; i <= end; i++) verses.push(i);
+        const [startStr, endStr] = versePart.split("-");
+        const start = Number(startStr?.trim());
+        const end = Number(endStr?.trim());
+
+        if (
+          Number.isFinite(start) &&
+          Number.isFinite(end) &&
+          start > 0 &&
+          end >= start
+        ) {
+          for (let i = start; i <= end; i++) verses.push(i);
+        } else {
+          continue;
+        }
       } else {
         verses = versePart
           .split(",")
-          .map((v) => parseInt(v.trim(), 10))
-          .filter(Boolean);
+          .map((v) => Number.parseInt(v.trim(), 10))
+          .filter((n) => Number.isFinite(n) && n > 0);
       }
+
+      if (verses.length === 0) continue;
 
       verses.sort((a, b) => a - b);
 
       let group = groups.find((g) => {
         if (g.bookChapter !== bookChapter) return false;
-
         const maxVerse = Math.max(...g.verses);
         return verses[0] === maxVerse + 1;
       });
 
       if (!group) {
-        group = {
-          bookChapter,
-          verses: [],
-          contents: [],
-          notes: [],
-        };
+        group = { bookChapter, verses: [], contents: [], notes: [] };
         groups.push(group);
       }
 
       group.verses.push(...verses);
 
-      if (Array.isArray(p.contents)) {
-        group.contents.push(...p.contents);
-      } else if (typeof p.content === "string") {
+      if (typeof p?.content === "string" && p.content.trim()) {
         group.contents.push(p.content);
       }
 
-      if (Array.isArray(p.notes)) {
+      if (Array.isArray(p?.notes)) {
         group.notes.push(...p.notes);
       }
     }
 
     return groups.map((g) => {
       const sortedVerses = Array.from(new Set(g.verses)).sort((a, b) => a - b);
-
       const minVerse = sortedVerses[0];
       const maxVerse = sortedVerses[sortedVerses.length - 1];
 

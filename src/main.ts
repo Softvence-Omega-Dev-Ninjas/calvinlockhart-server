@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const config = new DocumentBuilder()
-    .setTitle("Authentication API")
+    .setTitle("Calbinlockhart")
     .setDescription(
       "Auth system with signup, login, OTP verification, and password reset",
     )
