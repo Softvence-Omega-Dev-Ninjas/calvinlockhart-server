@@ -128,4 +128,17 @@ export class UsersService {
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }
+  async deleteUserAccount(userId: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+    });
+    if (user.isDeleted) throw new NotFoundException("user not found");
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        isDeleted: true
+      }
+    });
+    return { message: "Account Deleted" }
+  }
 }

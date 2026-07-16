@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
@@ -31,6 +32,7 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("Invalid credentials");
+    if (user.isDeleted) throw new NotFoundException("user not found");
 
     // if (!user.isEmailVerified) {
     //   throw new BadRequestException('Please Verify your Email.');
@@ -48,6 +50,7 @@ export class AuthService {
   async sendOtpForType(email: string, type: VerificationType) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("No such user");
+    if (user.isDeleted) throw new NotFoundException("user not found");
     const code = generateOTP(4);
     await this.tokenService.createToken(
       user.id,
@@ -66,6 +69,7 @@ export class AuthService {
   async verifyOtp(email: string, code: string, type: VerificationType) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("No such user");
+    if (user.isDeleted) throw new NotFoundException("user not found");
     await this.tokenService.consumeValidTokenForUser(user.id, code, type);
 
     if (type === VerificationType.EMAIL_VERIFICATION) {
@@ -92,6 +96,8 @@ export class AuthService {
       throw new UnauthorizedException("Unauthorized Access");
     }
 
+    if (user.isDeleted) throw new NotFoundException("user not found");
+
     // if (!user.isEmailVerified) {
     //   throw new BadRequestException("Please Verify your Email.");
     // }
@@ -105,6 +111,8 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException("Unauthorized Access");
     }
+
+    if (user.isDeleted) throw new NotFoundException("user not found");
     if (!user.isEmailVerified) {
       throw new BadRequestException("Please Verify your Email.");
     }

@@ -2,6 +2,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
   Put,
   Request,
@@ -62,4 +63,17 @@ export class UsersController {
       "User updated successfully",
     );
   }
+
+  @ApiOperation({ summary: "Delete user account" })
+  @Delete("/account/delete")
+  @ApiBearerAuth("JWT-auth")
+  @UseGuards(JwtAuthGuard)
+  deleteAccount(@Request() req: any) {
+    const userId = req.user.sub;
+    return handleRequest(
+      () => this.usersService.deleteUserAccount(userId),
+      "Get All Topic successfully",
+    );
+  }
+
 }
