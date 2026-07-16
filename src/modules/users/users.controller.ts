@@ -75,5 +75,4 @@ export class UsersController {
       "Get All Topic successfully",
     );
   }
-
 }

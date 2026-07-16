@@ -136,9 +136,9 @@ export class UsersService {
     await this.prisma.user.update({
       where: { id: user.id },
       data: {
-        isDeleted: true
-      }
+        isDeleted: true,
+      },
     });
-    return { message: "Account Deleted" }
+    return { message: "Account Deleted" };
   }
 }
