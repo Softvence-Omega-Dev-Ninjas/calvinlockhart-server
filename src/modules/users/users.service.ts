@@ -5,11 +5,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
 import * as bcrypt from "bcryptjs";
-import { UpdateUserDto } from "./dto/users.update.dto";
 import { v2 as cloudinary } from "cloudinary"; // Import configured cloudinary instance
 import streamifier from "streamifier";
+import { PrismaService } from "../prisma/prisma.service";
+import { UpdateUserDto } from "./dto/users.update.dto";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -146,5 +146,16 @@ export class UsersService {
       },
     });
     return { message: "Account Deleted" };
+  }
+
+  async deleteUserAccountByEmail(email: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { email },
+    });
+    if (user.isDeleted) throw new NotFoundException("user not found");
+    await this.prisma.user.delete({
+      where: { email },
+    });
+    return null;
   }
 }

@@ -4,15 +4,13 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Put,
   Request,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { UpdateUserDto } from "./dto/users.update.dto";
-import { handleRequest } from "src/common/utils/request.handler";
+import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -20,12 +18,13 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "src/common/guards/jwt.guards";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { handleRequest } from "src/common/utils/request.handler";
+import { UpdateUserDto } from "./dto/users.update.dto";
+import { UsersService } from "./users.service";
 
 @ApiTags("Users")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -70,6 +69,14 @@ export class UsersController {
     const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.usersService.deleteUserAccount(userId),
+      "Account deleted successfully",
+    );
+  }
+
+  @Delete("account/:email")
+  deleteAccountByEmail(@Request() req: any, @Param("email") email: string) {
+    return handleRequest(
+      () => this.usersService.deleteUserAccountByEmail(email),
       "Account deleted successfully",
     );
   }
