@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+npm-debug.log
+pnpm-debug.log
+yarn-error.log
+coverage
+.vscode
+.idea
+Dockerfile
+compose.yaml
+Makefile
+README.md

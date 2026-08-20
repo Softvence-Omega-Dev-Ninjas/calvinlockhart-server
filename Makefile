@@ -1,29 +1,30 @@
-# Docker image name
+# Docker Configuration
 APP_IMAGE := softvence/calvinlockhart-server:latest
-
-# Compose file
 COMPOSE_FILE := compose.yaml
 
-.PHONY: help build up down restart logs clean push
+.PHONY: help build up down restart logs clean push dev-db
 
-# Show available commands
+# Default target
 help:
-	@echo "Available commands:"
-	@echo "  make build       Build the Docker image"
-	@echo "  make up          Start containers using docker-compose"
-	@echo "  make down        Stop containers"
-	@echo "  make restart     Restart containers"
-	@echo "  make logs        Show logs of the app container"
-	@echo "  make clean       Remove containers, networks, volumes, and image"
-	@echo "  make push        Push the Docker image to Docker Hub"
+	@echo "========================================================"
+	@echo "Calvin Lockhart Server - Docker Management Commands"
+	@echo "========================================================"
+	@echo "  make build       - Build production multi-stage Docker image"
+	@echo "  make up          - Start all containers in detached mode"
+	@echo "  make down        - Stop and remove all containers"
+	@echo "  make restart     - Restart containers"
+	@echo "  make logs        - Follow container application logs"
+	@echo "  make dev-db      - Start only local Postgres database"
+	@echo "  make clean       - Remove containers, volumes, and built images"
+	@echo "  make push        - Build and push image to Docker Hub"
 
-# Build the Docker image
+# Build production multi-stage Docker image
 build:
 	docker build -t $(APP_IMAGE) .
 
 # Start containers
 up:
-	docker compose -f $(COMPOSE_FILE) up 
+	docker compose -f $(COMPOSE_FILE) up -d --build
 
 # Stop containers
 down:
@@ -32,15 +33,19 @@ down:
 # Restart containers
 restart: down up
 
-# Show logs of the app container
+# Show logs
 logs:
-	docker compose -f $(COMPOSE_FILE) logs -f calvinlockhart_api
+	docker compose -f $(COMPOSE_FILE) logs -f server
 
-# Cleanup everything
+# Start only local dev PostgreSQL database
+dev-db:
+	docker compose -f $(COMPOSE_FILE) up -d db
+
+# Clean up environment
 clean: down
-	docker volume rm calvinlockhart_db files || true
+	docker volume rm calvinlockhart_db || true
 	docker rmi $(APP_IMAGE) || true
 
-# Push to Docker Hub
+# Push image to registry
 push: build
 	docker push $(APP_IMAGE)
