@@ -67,35 +67,35 @@ Welcome to the official REST API documentation for the **Calvin Lockhart Server*
 
   const document = SwaggerModule.createDocument(app, config);
 
-  // const customCss = `
-  //   .swagger-ui { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; background-color: #ffffff; }
-  //   .swagger-ui .topbar { display: none; }
-  //   .swagger-ui .request-duration { display: none !important; }
-  //   .swagger-ui .info { margin: 20px 0 30px 0; padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
-  //   .swagger-ui .info .title { color: #0f172a; font-size: 28px; font-weight: 700; font-family: 'Inter', sans-serif; }
-  //   .swagger-ui .info p, .swagger-ui .info li { font-size: 14px; line-height: 1.6; color: #334155; }
-  //   .swagger-ui .scheme-container { background: #ffffff; border-bottom: 1px solid #e2e8f0; box-shadow: none; padding: 16px 0; }
-  //   .swagger-ui .opblock-tag { font-size: 18px; font-weight: 600; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding: 12px 0; }
-  //   .swagger-ui .opblock { border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 12px; border: 1px solid #e2e8f0; background: #ffffff; }
-  //   .swagger-ui .opblock .opblock-summary { padding: 10px 16px; background: #ffffff; }
-  //   .swagger-ui .opblock-summary-method { border-radius: 6px; font-weight: 700; font-size: 12px; min-width: 70px; text-align: center; }
-  //   .swagger-ui .opblock.opblock-post { background: #f0fdf4; border-color: #bbf7d0; }
-  //   .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #16a34a; }
-  //   .swagger-ui .opblock.opblock-get { background: #eff6ff; border-color: #bfdbfe; }
-  //   .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2563eb; }
-  //   .swagger-ui .opblock.opblock-put { background: #fffbeb; border-color: #fde68a; }
-  //   .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #d97706; }
-  //   .swagger-ui .opblock.opblock-patch { background: #faf5ff; border-color: #e9d5ff; }
-  //   .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #7c3aed; }
-  //   .swagger-ui .opblock.opblock-delete { background: #fef2f2; border-color: #fecaca; }
-  //   .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #dc2626; }
-  //   .swagger-ui .btn.authorize { background: #2563eb; color: #ffffff; border-radius: 6px; border: none; font-weight: 600; }
-  //   .swagger-ui .btn.authorize svg { fill: #ffffff; }
-  //   .swagger-ui section.models { border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; }
-  // `;
+  const customCss = `
+    .swagger-ui { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; background-color: #ffffff; }
+    .swagger-ui .topbar { display: none; }
+    .swagger-ui .request-duration { display: none !important; }
+    .swagger-ui .info { margin: 20px 0 30px 0; padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .swagger-ui .info .title { color: #0f172a; font-size: 28px; font-weight: 700; font-family: 'Inter', sans-serif; }
+    .swagger-ui .info p, .swagger-ui .info li { font-size: 14px; line-height: 1.6; color: #334155; }
+    .swagger-ui .scheme-container { background: #ffffff; border-bottom: 1px solid #e2e8f0; box-shadow: none; padding: 16px 0; }
+    .swagger-ui .opblock-tag { font-size: 18px; font-weight: 600; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding: 12px 0; }
+    .swagger-ui .opblock { border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 12px; border: 1px solid #e2e8f0; background: #ffffff; }
+    .swagger-ui .opblock .opblock-summary { padding: 10px 16px; background: #ffffff; }
+    .swagger-ui .opblock-summary-method { border-radius: 6px; font-weight: 700; font-size: 12px; min-width: 70px; text-align: center; }
+    .swagger-ui .opblock.opblock-post { background: #f0fdf4; border-color: #bbf7d0; }
+    .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #16a34a; }
+    .swagger-ui .opblock.opblock-get { background: #eff6ff; border-color: #bfdbfe; }
+    .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #2563eb; }
+    .swagger-ui .opblock.opblock-put { background: #fffbeb; border-color: #fde68a; }
+    .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #d97706; }
+    .swagger-ui .opblock.opblock-patch { background: #faf5ff; border-color: #e9d5ff; }
+    .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #7c3aed; }
+    .swagger-ui .opblock.opblock-delete { background: #fef2f2; border-color: #fecaca; }
+    .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #dc2626; }
+    .swagger-ui .btn.authorize { background: #2563eb; color: #ffffff; border-radius: 6px; border: none; font-weight: 600; }
+    .swagger-ui .btn.authorize svg { fill: #ffffff; }
+    .swagger-ui section.models { border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; }
+  `;
 
   SwaggerModule.setup("api/docs", app, document, {
-    // customCss,
+    customCss,
     customSiteTitle: "Calvin Lockhart API Documentation",
     swaggerOptions: {
       persistAuthorization: true,
