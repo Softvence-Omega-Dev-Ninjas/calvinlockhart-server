@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -10,15 +11,22 @@ import { CreateNoteDto, UpdateNoteDto } from "./dto/create.note.dto";
 export class NotesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId, dto: CreateNoteDto) {
+  async create(userId: string, dto: CreateNoteDto) {
     const { preceptId, description } = dto;
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!user) throw new BadRequestException("Unauthorized Access");
-    // Verify topic exists
-    const topic = await this.prisma.precept.findUnique({
+
+    const precept = await this.prisma.precept.findUnique({
       where: { id: preceptId },
+      include: { topic: true },
     });
-    if (!topic) throw new NotFoundException("Topic not found");
+    if (!precept) throw new NotFoundException("Precept not found");
+
+    if (precept.topic.userId !== userId) {
+      throw new ForbiddenException(
+        "You are not allowed to add notes to this precept",
+      );
+    }
 
     return this.prisma.note.create({
       data: {
@@ -32,8 +40,19 @@ export class NotesService {
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!user) throw new BadRequestException("Unauthorized Access");
 
-    const note = await this.prisma.note.findUnique({ where: { id: nodeId } });
+    const note = await this.prisma.note.findUnique({
+      where: { id: nodeId },
+      include: {
+        precept: {
+          include: { topic: true },
+        },
+      },
+    });
     if (!note) throw new NotFoundException("Note not found");
+
+    if (note.precept.topic.userId !== userId) {
+      throw new ForbiddenException("You are not allowed to update this note");
+    }
 
     return this.prisma.note.update({
       where: { id: nodeId },
@@ -44,8 +63,20 @@ export class NotesService {
   async remove(userId: string, id: string) {
     const user = await this.prisma.user.findFirst({ where: { id: userId } });
     if (!user) throw new BadRequestException("Unauthorized Access");
-    const note = await this.prisma.note.findUnique({ where: { id } });
+
+    const note = await this.prisma.note.findUnique({
+      where: { id },
+      include: {
+        precept: {
+          include: { topic: true },
+        },
+      },
+    });
     if (!note) throw new NotFoundException("Note not found");
+
+    if (note.precept.topic.userId !== userId) {
+      throw new ForbiddenException("You are not allowed to delete this note");
+    }
 
     return this.prisma.note.delete({ where: { id } });
   }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -24,68 +23,80 @@ export class AuthService {
   ) {}
 
   async signup(email: string, password: string, confirmPassword: string) {
-    await this.users.createUser(email, password, confirmPassword);
-
-    return { message: "User Registered. Please Verify Your Email." };
+    const user = await this.users.createUser(email, password, confirmPassword);
+    await this.sendOtpForType(user.email, VerificationType.EMAIL_VERIFICATION);
+    return {
+      message: "User registered successfully. Please verify your email.",
+    };
   }
 
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException("Invalid credentials");
-    if (user.isDeleted) throw new NotFoundException("user not found");
+    if (user.isDeleted) throw new NotFoundException("User not found");
 
-    // if (!user.isEmailVerified) {
-    //   throw new BadRequestException('Please Verify your Email.');
-    // }
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException(
+        "Please verify your email address before logging in.",
+      );
+    }
 
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok)
-      throw new UnauthorizedException(
-        "Invalid credentials Password Does Not Match",
-      );
-    const payload = { sub: user.id, email: user.email };
+    if (!ok) throw new UnauthorizedException("Invalid credentials");
+
+    const payload = { sub: user.id, email: user.email, type: "access" };
     return { user, access_token: this.jwt.sign(payload) };
   }
 
   async sendOtpForType(email: string, type: VerificationType) {
     const user = await this.users.findByEmail(email);
-    if (!user) throw new UnauthorizedException("No such user");
-    if (user.isDeleted) throw new NotFoundException("user not found");
-    const code = generateOTP(4);
+    if (!user) throw new NotFoundException("No account found with this email");
+    if (user.isDeleted) throw new NotFoundException("User not found");
+
+    const code = generateOTP(6);
     await this.tokenService.createToken(
       user.id,
       code,
       type,
       Number(this.config.get("OTP_EXPIRES_MINUTES") || 5),
     );
+
     if (type === VerificationType.PASSWORD_RESET) {
       await this.mailer.sendPasswordResetEmail(email, code);
     } else {
       await this.mailer.sendVerificationEmail(email, code);
     }
-    return { message: "Code sent" };
+    return { message: "Verification code sent successfully" };
   }
 
   async verifyOtp(email: string, code: string, type: VerificationType) {
     const user = await this.users.findByEmail(email);
-    if (!user) throw new UnauthorizedException("No such user");
-    if (user.isDeleted) throw new NotFoundException("user not found");
+    if (!user) throw new NotFoundException("No account found with this email");
+    if (user.isDeleted) throw new NotFoundException("User not found");
+
     await this.tokenService.consumeValidTokenForUser(user.id, code, type);
 
     if (type === VerificationType.EMAIL_VERIFICATION) {
       await this.users.setEmailVerified(user.id);
-      return { message: "Email verified" };
+      return { message: "Email verified successfully" };
     } else if (type === VerificationType.PASSWORD_RESET) {
+      // Proving ownership of email via OTP also verifies email
+      if (!user.isEmailVerified) {
+        await this.users.setEmailVerified(user.id);
+      }
       const expiresIn = Number(
         this.config.get("RESET_TOKEN_EXPIRES_SECONDS") || 900,
       );
-      const token = this.jwt.sign({ sub: user.id, reset: true }, { expiresIn });
+      const token = this.jwt.sign(
+        { sub: user.id, email: user.email, reset: true, type: "reset" },
+        { expiresIn },
+      );
       return { resetToken: token };
     }
     return { message: "OK" };
   }
 
-  // reset password...
+  // Logged-in password reset (with old password)
   async resetPassword(
     userId: string,
     oldPassword: string,
@@ -96,26 +107,24 @@ export class AuthService {
       throw new UnauthorizedException("Unauthorized Access");
     }
 
-    if (user.isDeleted) throw new NotFoundException("user not found");
+    if (user.isDeleted) throw new NotFoundException("User not found");
 
-    // if (!user.isEmailVerified) {
-    //   throw new BadRequestException("Please Verify your Email.");
-    // }
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException("Please verify your email address.");
+    }
 
     return this.users.updatePassword(userId, oldPassword, newPassword);
   }
 
-  // forget password
+  // Forgot password new password set (with reset token)
   async setPassword(userId: string, newPassword: string) {
     const user = await this.users.findById(userId);
     if (!user) {
       throw new UnauthorizedException("Unauthorized Access");
     }
 
-    if (user.isDeleted) throw new NotFoundException("user not found");
-    if (!user.isEmailVerified) {
-      throw new BadRequestException("Please Verify your Email.");
-    }
+    if (user.isDeleted) throw new NotFoundException("User not found");
+
     return this.users.forgetUpdatePassword(userId, newPassword);
   }
 }

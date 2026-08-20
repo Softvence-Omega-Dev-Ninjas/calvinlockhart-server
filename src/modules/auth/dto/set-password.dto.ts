@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, MinLength } from "class-validator";
 
-export class setPasswordDto {
+export class SetPasswordDto {
   @ApiProperty({ example: "NewStrongPass123", description: "New password" })
   @IsNotEmpty()
   @MinLength(6)

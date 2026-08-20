@@ -7,10 +7,14 @@ export class MailerService {
   private transporter: nodemailer.Transporter;
 
   constructor(private readonly config: ConfigService) {
+    const host = this.config.get<string>("SMTP_HOST") || "smtp.gmail.com";
+    const port = Number(this.config.get<number>("SMTP_PORT") || 587);
+    const secure = port === 465;
+
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // use STARTTLS, not SSL
+      host,
+      port,
+      secure,
       auth: {
         user: this.config.getOrThrow("SMTP_USER"),
         pass: this.config.getOrThrow("SMTP_PASS"),
@@ -24,10 +28,19 @@ export class MailerService {
   async sendVerificationEmail(email: string, code: string) {
     try {
       return await this.transporter.sendMail({
-        from: `"Verify Email" <${this.config.getOrThrow("SMTP_USER")}>`,
+        from: `"Calvin Lockhart" <${this.config.getOrThrow("SMTP_USER")}>`,
         to: email,
         subject: "Email Verification Code",
-        html: `<p>Your verification code: <b>${code}</b></p>`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #333333; text-align: center;">Verify Your Email</h2>
+            <p style="color: #666666; font-size: 16px;">Thank you for registering. Please use the verification code below to verify your email address:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #4A90E2; background-color: #F0F4F8; padding: 12px 24px; border-radius: 6px; display: inline-block;">${code}</span>
+            </div>
+            <p style="color: #999999; font-size: 14px;">This code is valid for 5 minutes. If you did not request this email, please ignore it.</p>
+          </div>
+        `,
       });
     } catch (err) {
       console.error("Error sending verification email:", err);
@@ -40,10 +53,19 @@ export class MailerService {
   async sendPasswordResetEmail(email: string, code: string) {
     try {
       return await this.transporter.sendMail({
-        from: `"Reset Password" <${this.config.getOrThrow("SMTP_USER")}>`,
+        from: `"Calvin Lockhart" <${this.config.getOrThrow("SMTP_USER")}>`,
         to: email,
         subject: "Password Reset Code",
-        html: `<p>Your password reset code: <b>${code}</b></p>`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #333333; text-align: center;">Password Reset Request</h2>
+            <p style="color: #666666; font-size: 16px;">We received a request to reset your password. Use the code below to proceed with resetting your password:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #E74C3C; background-color: #FDEDEC; padding: 12px 24px; border-radius: 6px; display: inline-block;">${code}</span>
+            </div>
+            <p style="color: #999999; font-size: 14px;">This code is valid for 5 minutes. If you did not request a password reset, your account is safe and you can ignore this email.</p>
+          </div>
+        `,
       });
     } catch (err) {
       console.error("Error sending password reset email:", err);

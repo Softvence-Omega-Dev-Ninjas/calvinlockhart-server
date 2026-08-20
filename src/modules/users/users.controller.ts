@@ -66,13 +66,11 @@ export class UsersController {
 
   @ApiOperation({ summary: "Delete user account" })
   @Delete("/account/delete")
-  @ApiBearerAuth("JWT-auth")
-  @UseGuards(JwtAuthGuard)
   deleteAccount(@Request() req: any) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.usersService.deleteUserAccount(userId),
-      "Get All Topic successfully",
+      "Account deleted successfully",
     );
   }
 }

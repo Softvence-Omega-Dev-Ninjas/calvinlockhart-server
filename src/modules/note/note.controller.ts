@@ -22,7 +22,7 @@ export class NotesController {
   constructor(private readonly service: NotesService) {}
   @Post("")
   create(@Body() dto: CreateNoteDto, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.create(userId, dto),
       "Create Note successfully",
@@ -35,7 +35,7 @@ export class NotesController {
     @Body() dto: UpdateNoteDto,
     @Request() req,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.update(userId, nodeId, dto),
       "Update Note successfully",
@@ -44,7 +44,7 @@ export class NotesController {
 
   @Delete(":nodeId")
   remove(@Param("nodeId") nodeId: string, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.remove(userId, nodeId),
       "Remove Note successfully",

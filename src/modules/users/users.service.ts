@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -21,15 +22,20 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async createUser(email: string, password: string, confirmPassword: string) {
+    if (password !== confirmPassword) {
+      throw new BadRequestException("Passwords do not match");
+    }
     const exists = await this.prisma.user.findUnique({ where: { email } });
     if (exists) {
-      return exists.isEmailVerified;
+      if (exists.isDeleted) {
+        throw new BadRequestException(
+          "Account associated with this email was deleted",
+        );
+      }
+      throw new ConflictException("Email is already registered");
     }
     const hashed = await bcrypt.hash(password, 10);
 
-    if (password !== confirmPassword) {
-      throw new BadRequestException("Please Provide Valid Credentials.");
-    }
     return this.prisma.user.create({
       data: { email, password: hashed },
     });

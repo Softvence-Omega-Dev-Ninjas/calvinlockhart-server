@@ -14,6 +14,12 @@ export class TokenService {
     type: VerificationType,
     expiresInMinutes: number,
   ) {
+    // Invalidate all previous unused tokens for this user and type
+    await this.prisma.verificationToken.updateMany({
+      where: { userId, type, used: false },
+      data: { used: true },
+    });
+
     const hashed = await bcrypt.hash(rawToken, 10);
     const expiresAt = addMinutes(new Date(), expiresInMinutes);
     return this.prisma.verificationToken.create({
