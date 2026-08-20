@@ -7,26 +7,11 @@ export class MailerService {
   private transporter: nodemailer.Transporter;
 
   constructor(private readonly config: ConfigService) {
-    const host = this.config.get<string>("SMTP_HOST") || "smtp.gmail.com";
-    const port = Number(this.config.get<number>("SMTP_PORT") || 587);
-    const secure = port === 465;
-
     this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
-      pool: true, // Reuse SMTP connection pool to prevent per-request connection overhead
-      maxConnections: 5,
-      maxMessages: 100,
-      connectionTimeout: 10000, // 10s connection timeout
-      greetingTimeout: 5000, // 5s greeting timeout
-      socketTimeout: 10000, // 10s socket timeout
+      service: "gmail",
       auth: {
         user: this.config.getOrThrow("SMTP_USER"),
         pass: this.config.getOrThrow("SMTP_PASS"),
-      },
-      tls: {
-        rejectUnauthorized: false,
       },
     });
   }
