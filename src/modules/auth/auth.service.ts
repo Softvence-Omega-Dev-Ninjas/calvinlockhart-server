@@ -62,9 +62,13 @@ export class AuthService {
     );
 
     if (type === VerificationType.PASSWORD_RESET) {
-      await this.mailer.sendPasswordResetEmail(email, code);
+      this.mailer.sendPasswordResetEmail(email, code).catch((err) => {
+        console.error("Background password reset email dispatch failed:", err);
+      });
     } else {
-      await this.mailer.sendVerificationEmail(email, code);
+      this.mailer.sendVerificationEmail(email, code).catch((err) => {
+        console.error("Background verification email dispatch failed:", err);
+      });
     }
     return { message: "Verification code sent successfully" };
   }

@@ -15,6 +15,12 @@ export class MailerService {
       host,
       port,
       secure,
+      pool: true, // Reuse SMTP connection pool to prevent per-request connection overhead
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 10000, // 10s connection timeout
+      greetingTimeout: 5000, // 5s greeting timeout
+      socketTimeout: 10000, // 10s socket timeout
       auth: {
         user: this.config.getOrThrow("SMTP_USER"),
         pass: this.config.getOrThrow("SMTP_PASS"),
