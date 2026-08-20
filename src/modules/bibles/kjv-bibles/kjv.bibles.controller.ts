@@ -1,6 +1,8 @@
 import { Controller, Get, Param } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
 import { KjvBiblesService } from "./kjv.bibles.service";
 
+@ApiTags("Bibles")
 @Controller("kjv")
 export class KjvBiblesController {
   constructor(private readonly service: KjvBiblesService) {}
