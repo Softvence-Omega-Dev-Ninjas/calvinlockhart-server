@@ -35,11 +35,12 @@ export class AuthService {
     if (!user) throw new UnauthorizedException("Invalid credentials");
     if (user.isDeleted) throw new NotFoundException("User not found");
 
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedException(
-        "Please verify your email address before logging in.",
-      );
-    }
+    // User verification with email not required in login for now
+    // if (!user.isEmailVerified) {
+    //   throw new UnauthorizedException(
+    //     "Please verify your email address before logging in.",
+    //   );
+    // }
 
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) throw new UnauthorizedException("Invalid credentials");
