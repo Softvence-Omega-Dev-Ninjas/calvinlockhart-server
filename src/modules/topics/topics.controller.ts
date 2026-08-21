@@ -17,6 +17,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "src/common/guards/jwt.guards";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
+import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
 
 @ApiTags("Topics")
 @ApiBearerAuth("JWT-auth")
@@ -29,7 +30,7 @@ export class TopicsController {
   @ApiOperation({ summary: "Create New Topic" })
   @Post()
   create(@Body() dto: CreateTopicDto, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.createTopic(userId, dto),
       "Create Topic successfully",
@@ -40,7 +41,7 @@ export class TopicsController {
   @ApiOperation({ summary: "Get All Topic" })
   @Get()
   findAll(@Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.findAll(userId),
       "Get All Topic successfully",
@@ -49,7 +50,7 @@ export class TopicsController {
 
   @Get("/precepts-topic")
   findPreceptTopic(@Request() req, @Query() query?: QueryTopicDto) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.findPreceptTopic(userId, query),
       "Get All Precept Topic successfully",
@@ -57,7 +58,7 @@ export class TopicsController {
   }
   @Get("/lessons-topic")
   findLessonTopic(@Request() req, @Query() query?: QueryTopicDto) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.findLessonTopic(userId, query),
       "Get All Lesson Topic successfully",
@@ -65,10 +66,21 @@ export class TopicsController {
   }
   @Get("/favorites-topic")
   findFavoriteTopic(@Request() req, @Query() query?: QueryTopicDto) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.findFavoriteTopic(userId, query),
       "Get All Favorites Topic successfully",
+    );
+  }
+
+  // Reorder Topics within Category
+  @ApiOperation({ summary: "Reorder topics within a category" })
+  @Patch("reorder")
+  async reorderTopics(@Request() req, @Body() dto: ReorderTopicsDto) {
+    const userId = req.user.userId || req.user.sub;
+    return handleRequest(
+      () => this.service.reorderTopics(userId, dto),
+      "Topics reordered successfully",
     );
   }
 
@@ -76,7 +88,7 @@ export class TopicsController {
   @ApiOperation({ summary: "Get a Single Topic" })
   @Get(":topicId")
   findOne(@Param("topicId") topicId: string, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.findOne(userId, topicId),
       "Get Single Topic successfully",
@@ -86,7 +98,7 @@ export class TopicsController {
   @ApiOperation({ summary: "Remove Topic" })
   @Delete(":topicId")
   removeTopic(@Param("topicId") topicId: string, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.removeTopic(userId, topicId),
       "Remove Topic successfully",
@@ -101,7 +113,7 @@ export class TopicsController {
     @Request() req,
     @Body() dto: UpdateTopicDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
 
     return handleRequest(
       () => this.service.patchUpdateTopic(userId, topicId, dto),
@@ -117,7 +129,7 @@ export class TopicsController {
     @Request() req,
     @Body() dto: AddPreceptsDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.addPrecepts(userId, topicId, dto),
       "Added Another Precepts successfully",
@@ -127,7 +139,7 @@ export class TopicsController {
   @Delete("removePrecept/:preceptId")
   @ApiOperation({ summary: "delete indiviual precepts" })
   async removePrecept(@Param("preceptId") preceptId: string, @Request() req) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
     return handleRequest(
       () => this.service.removePrecept(userId, preceptId),
       "remove Precepts successfully",
@@ -141,7 +153,7 @@ export class TopicsController {
     @Request() req,
     @Body() dto: UpdatePreceptDto,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user.userId || req.user.sub;
 
     return handleRequest(
       () => this.service.updatePrecept(userId, preceptId, dto),

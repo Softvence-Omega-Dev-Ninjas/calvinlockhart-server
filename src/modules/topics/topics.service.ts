@@ -8,6 +8,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
+import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
 
 @Injectable()
 export class TopicsService {
@@ -46,6 +47,7 @@ export class TopicsService {
           orderBy: { reference: "asc" },
         },
       },
+      orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
 
     return topics.map((topic) => ({
@@ -110,9 +112,7 @@ export class TopicsService {
       include: {
         precepts: true,
       },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
 
     if (!preceptTopic || preceptTopic.length === 0) {
@@ -155,9 +155,7 @@ export class TopicsService {
       include: {
         precepts: true,
       },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
 
     if (!preceptTopic || preceptTopic.length === 0) {
@@ -199,9 +197,7 @@ export class TopicsService {
       include: {
         precepts: true,
       },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
 
     if (!preceptTopic || preceptTopic.length === 0) {
@@ -209,6 +205,47 @@ export class TopicsService {
     }
 
     return preceptTopic;
+  }
+
+  // reorder topics within a category
+  async reorderTopics(userId: string, dto: ReorderTopicsDto) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException("Unauthorized Access.");
+    }
+
+    const { destination, topicIds } = dto;
+    if (!topicIds || topicIds.length === 0) {
+      throw new BadRequestException("No topic IDs provided to reorder");
+    }
+
+    // Verify all topicIds belong to this user and match the destination category
+    const userTopics = await this.prisma.topic.findMany({
+      where: {
+        id: { in: topicIds },
+        userId,
+        destination,
+      },
+      select: { id: true },
+    });
+
+    if (userTopics.length !== topicIds.length) {
+      throw new ForbiddenException(
+        "One or more topic IDs are invalid or do not belong to you",
+      );
+    }
+
+    // Batch update order index atomically
+    await this.prisma.$transaction(
+      topicIds.map((id, index) =>
+        this.prisma.topic.update({
+          where: { id },
+          data: { order: index },
+        }),
+      ),
+    );
+
+    return { message: "Topics reordered successfully" };
   }
 
   // remove topic
