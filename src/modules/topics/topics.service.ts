@@ -9,6 +9,7 @@ import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
 import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
+import { ReorderPreceptsDto } from "./dto/reorder.precept.dto";
 
 @Injectable()
 export class TopicsService {
@@ -29,13 +30,18 @@ export class TopicsService {
         userId,
         precepts: {
           create:
-            dto.precepts?.map((p) => ({
+            dto.precepts?.map((p, index) => ({
               reference: p.reference,
               content: p.content,
+              order: index,
             })) || [],
         },
       },
-      include: { precepts: true },
+      include: {
+        precepts: {
+          orderBy: { order: "asc" },
+        },
+      },
     });
   }
   //  find user all topics
@@ -44,7 +50,7 @@ export class TopicsService {
       where: { userId },
       include: {
         precepts: {
-          orderBy: { reference: "asc" },
+          orderBy: { order: "asc" },
         },
       },
       orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
@@ -70,7 +76,7 @@ export class TopicsService {
       include: {
         precepts: {
           orderBy: {
-            reference: "asc",
+            order: "asc",
           },
           include: {
             notes: true,
@@ -110,7 +116,9 @@ export class TopicsService {
           : {}),
       },
       include: {
-        precepts: true,
+        precepts: {
+          orderBy: { order: "asc" },
+        },
       },
       orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
@@ -153,7 +161,9 @@ export class TopicsService {
           : {}),
       },
       include: {
-        precepts: true,
+        precepts: {
+          orderBy: { order: "asc" },
+        },
       },
       orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
@@ -195,7 +205,9 @@ export class TopicsService {
           : {}),
       },
       include: {
-        precepts: true,
+        precepts: {
+          orderBy: { order: "asc" },
+        },
       },
       orderBy: [{ order: "asc" }, { updatedAt: "desc" }],
     });
@@ -246,6 +258,57 @@ export class TopicsService {
     );
 
     return { message: "Topics reordered successfully" };
+  }
+
+  // reorder precepts within a topic
+  async reorderPrecepts(userId: string, dto: ReorderPreceptsDto) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException("Unauthorized Access.");
+    }
+
+    const { topicId, preceptIds } = dto;
+    if (!preceptIds || preceptIds.length === 0) {
+      throw new BadRequestException("No precept IDs provided to reorder");
+    }
+
+    // Verify topic exists and belongs to the user
+    const topic = await this.prisma.topic.findUnique({
+      where: { id: topicId },
+    });
+
+    if (!topic || topic.userId !== userId) {
+      throw new ForbiddenException(
+        "Topic not found or you are not authorized to modify it",
+      );
+    }
+
+    // Verify all preceptIds belong to this topic
+    const userPrecepts = await this.prisma.precept.findMany({
+      where: {
+        id: { in: preceptIds },
+        topicId,
+      },
+      select: { id: true },
+    });
+
+    if (userPrecepts.length !== preceptIds.length) {
+      throw new ForbiddenException(
+        "One or more precept IDs are invalid or do not belong to this topic",
+      );
+    }
+
+    // Batch update order index atomically
+    await this.prisma.$transaction(
+      preceptIds.map((id, index) =>
+        this.prisma.precept.update({
+          where: { id },
+          data: { order: index },
+        }),
+      ),
+    );
+
+    return { message: "Precepts reordered successfully" };
   }
 
   // remove topic
@@ -326,13 +389,21 @@ export class TopicsService {
       );
     }
 
+    const lastPrecept = await this.prisma.precept.findFirst({
+      where: { topicId },
+      orderBy: { order: "desc" },
+      select: { order: true },
+    });
+    const startOrder = (lastPrecept?.order ?? -1) + 1;
+
     // create
     const precepts = await Promise.all(
-      dto.precepts.map((p) =>
+      dto.precepts.map((p, index) =>
         this.prisma.precept.create({
           data: {
             reference: p.reference.trim(),
             content: p.content,
+            order: startOrder + index,
             topic: { connect: { id: topicId } },
           },
         }),

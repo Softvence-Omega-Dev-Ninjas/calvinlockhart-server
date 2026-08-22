@@ -18,6 +18,7 @@ import { JwtAuthGuard } from "src/common/guards/jwt.guards";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { QueryTopicDto } from "./dto/topic.query.dto";
 import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
+import { ReorderPreceptsDto } from "./dto/reorder.precept.dto";
 
 @ApiTags("Topics")
 @ApiBearerAuth("JWT-auth")
@@ -81,6 +82,17 @@ export class TopicsController {
     return handleRequest(
       () => this.service.reorderTopics(userId, dto),
       "Topics reordered successfully",
+    );
+  }
+
+  // Reorder Precepts within a Topic
+  @ApiOperation({ summary: "Reorder precepts within a topic" })
+  @Patch("reorder-precepts")
+  async reorderPrecepts(@Request() req, @Body() dto: ReorderPreceptsDto) {
+    const userId = req.user.userId || req.user.sub;
+    return handleRequest(
+      () => this.service.reorderPrecepts(userId, dto),
+      "Precepts reordered successfully",
     );
   }
 

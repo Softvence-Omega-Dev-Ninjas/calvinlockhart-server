@@ -74,8 +74,11 @@ model Precept {
   topicId   String
   topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   notes     Note[]
+  order     Int      @default(0)
   createAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([topicId, order])
 }
 
 model Note {
