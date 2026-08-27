@@ -4,8 +4,6 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
-const require = createRequire(import.meta.url);
-
 export default defineConfig([
   globalIgnores([
     "node_modules/*",
@@ -46,3 +44,4 @@ export default defineConfig([
     },
   },
   eslintPluginPrettierRecommended,
+]);
