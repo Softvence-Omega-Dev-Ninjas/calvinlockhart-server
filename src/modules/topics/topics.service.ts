@@ -211,10 +211,10 @@ export class TopicsService {
           : {}),
       },
       include: {
-        select: {
-          notes: true,
-        },
         precepts: {
+          select: {
+            notes: true,
+          },
           orderBy: { order: "asc" },
         },
       },
