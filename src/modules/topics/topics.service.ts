@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
-import { QueryTopicDto } from "./dto/topic.query.dto";
-import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
+import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
 import { ReorderPreceptsDto } from "./dto/reorder.precept.dto";
+import { ReorderTopicsDto } from "./dto/reorder.topic.dto";
+import { QueryTopicDto } from "./dto/topic.query.dto";
 
 @Injectable()
 export class TopicsService {
@@ -117,6 +117,9 @@ export class TopicsService {
       },
       include: {
         precepts: {
+          select: {
+            notes: true,
+          },
           orderBy: { order: "asc" },
         },
       },
@@ -162,6 +165,9 @@ export class TopicsService {
       },
       include: {
         precepts: {
+          select: {
+            notes: true,
+          },
           orderBy: { order: "asc" },
         },
       },
@@ -205,6 +211,9 @@ export class TopicsService {
           : {}),
       },
       include: {
+        select: {
+          notes: true,
+        },
         precepts: {
           orderBy: { order: "asc" },
         },
