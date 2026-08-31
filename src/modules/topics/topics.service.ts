@@ -212,7 +212,7 @@ export class TopicsService {
       },
       include: {
         precepts: {
-          select: {
+          include: {
             notes: true,
           },
           orderBy: { order: "asc" },
