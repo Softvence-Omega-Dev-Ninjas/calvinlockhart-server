@@ -99,6 +99,17 @@ export class UsersService {
   async findOne(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        bio: true,
+        userAvatar: true,
+        isEmailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     if (!user) {
       throw new NotFoundException("Unvalid User");
