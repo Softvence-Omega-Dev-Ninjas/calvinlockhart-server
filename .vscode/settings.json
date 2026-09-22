@@ -29,5 +29,6 @@
   // 🔧 Prettier Config Sync
   "prettier.useEditorConfig": true,
   "prettier.resolveGlobalModules": false,
-  "cSpell.words": ["strongs"]
+  "cSpell.words": ["strongs"],
+  "prisma.pinToPrisma6": true
 }
