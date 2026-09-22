@@ -36,13 +36,16 @@ export class UsersController {
   @ApiOperation({ summary: "Show user own information" })
   @Get("/me")
   async findOne(@Request() req) {
-    const email = req.user.email;
-    return handleRequest(
-      () => this.usersService.findOne(email),
-      "User fetched successfully",
-    );
+    try {
+      const userId = req.user.userId || req.user.sub;
+      return handleRequest(
+        () => this.usersService.findOneById(userId),
+        "User fetched successfully",
+      );
+    } catch (error) {
+      throw error;
+    }
   }
-
   // @UseInterceptors(FileInterceptor('userAvatar', { storage }))
   @ApiOperation({ summary: "Update user information" })
   @Put("/updateMe")
