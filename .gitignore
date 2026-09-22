@@ -62,6 +62,3 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 .pnpm-store
 pnpm-debug.log*
-branch_structure.json
-temp_auto_push.bat
-temp_interactive_push.bat
