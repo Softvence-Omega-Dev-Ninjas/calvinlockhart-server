@@ -95,26 +95,29 @@ export class UsersService {
     });
   }
 
-  // get user by id
-  async findOne(email: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        bio: true,
-        userAvatar: true,
-        isEmailVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    if (!user) {
-      throw new NotFoundException("Unvalid User");
+  async findOneById(id: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          bio: true,
+          userAvatar: true,
+          isEmailVerified: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      if (!user) {
+        throw new NotFoundException("Unvalid User");
+      }
+      return user;
+    } catch (error) {
+      throw error;
     }
-    return user;
   }
 
   // user update
