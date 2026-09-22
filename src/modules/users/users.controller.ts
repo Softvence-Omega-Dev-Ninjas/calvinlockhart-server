@@ -8,6 +8,7 @@ import {
   Put,
   Request,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -18,6 +19,7 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "src/common/guards/jwt.guards";
 import { handleRequest } from "src/common/utils/request.handler";
 import { UpdateUserDto } from "./dto/users.update.dto";
 import { UsersService } from "./users.service";
@@ -30,6 +32,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // Todo convert user login....
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Show user own information" })
   @Get("/me")
   async findOne(@Request() req) {
