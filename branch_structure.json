@@ -1,0 +1,18 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "fixing/siam",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "fixing/siam": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "fixing/siam",
+    "origin"
+  ]
+}
