@@ -24,6 +24,7 @@ import { handleRequest } from "src/common/utils/request.handler";
 import { UpdateUserDto } from "./dto/users.update.dto";
 import { UsersService } from "./users.service";
 
+@UseGuards(JwtAuthGuard)
 @ApiTags("Users")
 @ApiBearerAuth("JWT-auth")
 // @UseGuards(JwtAuthGuard)
@@ -32,12 +33,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // Todo convert user login....
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({ summary: "Show user own information" })
   @Get("/me")
   async findOne(@Request() req) {
     try {
-      const userId = req.user.userId || req.user.sub;
+      const userId = req.user.sub || req.user.userId;
       return handleRequest(
         () => this.usersService.findOneById(userId),
         "User fetched successfully",
@@ -72,7 +73,7 @@ export class UsersController {
   @ApiOperation({ summary: "Delete user account" })
   @Delete("/account/delete")
   deleteAccount(@Request() req: any) {
-    const userId = req.user.userId || req.user.sub;
+    const userId = req.user.sub || req.user.userId;
     return handleRequest(
       () => this.usersService.deleteUserAccount(userId),
       "Account deleted successfully",
