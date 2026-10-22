@@ -83,6 +83,7 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /root/calvinlockhart-server
+            git pull origin main
             docker compose pull
             docker compose down --remove-orphans
             docker compose up -d
