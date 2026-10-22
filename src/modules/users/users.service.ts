@@ -126,7 +126,7 @@ export class UsersService {
       where: { email },
     });
     if (!user) {
-      throw new NotFoundException("User is Not found");
+      throw new NotFoundException("User not found");
     }
     return this.prisma.user.update({
       where: { email },

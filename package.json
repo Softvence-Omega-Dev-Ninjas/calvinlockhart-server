@@ -18,7 +18,7 @@
     "ci:check": "npm run format && npm run lint && npm run build && npm run start:prod",
     "ci:fix": "npm run format:fix && npm run lint:fix",
     "postinstall": "npx prisma generate",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
@@ -31,6 +31,7 @@
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/throttler": "^6.5.0",
     "@prisma/client": "^6.16.1",
+    "prisma": "^6.16.1",
     "@types/bcryptjs": "^2.4.6",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
@@ -74,7 +75,6 @@
     "jest": "^30.0.0",
     "multer": "^2.0.2",
     "prettier": "^3.4.2",
-    "prisma": "^6.16.1",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
