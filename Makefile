@@ -42,8 +42,8 @@ dev-db:
 	docker compose -f $(COMPOSE_FILE) up -d db
 
 # Clean up environment
-clean: down
-	docker volume rm calvinlockhart_db || true
+clean:
+	docker compose -f $(COMPOSE_FILE) down -v
 	docker rmi $(APP_IMAGE) || true
 
 # Push image to registry
