@@ -789,8 +789,7 @@ export default [
     "Cantad a Dios, cantad; Cantad a nuestro Rey, cantad;",
     "Porque Dios es el Rey de toda la tierra; Cantad con inteligencia.",
     "Reinó Dios sobre las naciones; Se sentó Dios sobre su santo trono.",
-    "Los príncipes de los pueblos se reunieron Como pueblo del Dios de Abraham;",
-    "Porque de Dios son los escudos de la tierra; El es muy exaltado.",
+    "Los príncipes de los pueblos se reunieron Como pueblo del Dios de Abraham; Porque de Dios son los escudos de la tierra; El es muy exaltado.",
   ],
   [
     "Grande es Jehová, y digno de ser en gran manera alabado En la ciudad de nuestro Dios, en su monte santo.",
