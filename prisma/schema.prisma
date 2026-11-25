@@ -18,6 +18,11 @@ enum VerificationType {
   PASSWORD_RESET
 }
 
+enum PreceptType {
+  SCRIPTURE
+  FREEFORM
+}
+
 enum TopicDestination {
   PRECEPT_TOPIC
   LESSON_PRECEPTS
@@ -71,6 +76,7 @@ model Precept {
   id        String   @id @default(uuid())
   reference String
   content   String
+  type      PreceptType @default(SCRIPTURE)
   topicId   String
   topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   notes     Note[]
