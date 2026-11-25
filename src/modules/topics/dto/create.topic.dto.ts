@@ -3,18 +3,32 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  ValidateIf,
   ValidateNested,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { TopicDestination } from "@prisma/client";
+import { PreceptType, TopicDestination } from "@prisma/client";
 
 export class CreatePreceptDto {
+  @ApiPropertyOptional({
+    enum: PreceptType,
+    default: PreceptType.SCRIPTURE,
+    description:
+      "SCRIPTURE = Bible reference + verse text (default). FREEFORM = free text in both fields; reference may be empty.",
+  })
+  @IsOptional()
+  @IsEnum(PreceptType)
+  type?: PreceptType;
+
   @ApiProperty({
-    description: "Bible verse reference",
+    description:
+      "Bible verse reference (required for SCRIPTURE). For FREEFORM this is an optional free-text heading.",
     example: "Matthew 4:3",
   })
+  @ValidateIf((o: { type?: PreceptType }) => o.type !== PreceptType.FREEFORM)
   @IsNotEmpty()
+  @IsString()
   reference: string;
 
   @ApiProperty({

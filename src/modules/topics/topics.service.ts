@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { PreceptType } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { AddPreceptsDto, UpdatePreceptDto } from "./dto/create.precept.dto";
 import { CreateTopicDto, UpdateTopicDto } from "./dto/create.topic.dto";
@@ -31,8 +32,9 @@ export class TopicsService {
         precepts: {
           create:
             dto.precepts?.map((p, index) => ({
-              reference: p.reference,
+              reference: (p.reference ?? "").trim(),
               content: p.content,
+              type: p.type ?? PreceptType.SCRIPTURE,
               order: index,
             })) || [],
         },
@@ -371,7 +373,12 @@ export class TopicsService {
       throw new BadRequestException("Precepts Data required.");
     }
 
+    // Duplicate-reference rules only apply to scripture precepts; free-form
+    // precepts may share (or omit) a heading.
     const incomingRefs = dto.precepts
+      .filter(
+        (p) => (p.type ?? PreceptType.SCRIPTURE) === PreceptType.SCRIPTURE,
+      )
       .map((p) => (p.reference ?? "").trim())
       .filter(Boolean);
 
@@ -387,6 +394,7 @@ export class TopicsService {
     const existing = await this.prisma.precept.findMany({
       where: {
         topicId,
+        type: PreceptType.SCRIPTURE,
         reference: { in: incomingRefs },
       },
       select: { reference: true },
@@ -410,8 +418,9 @@ export class TopicsService {
       dto.precepts.map((p, index) =>
         this.prisma.precept.create({
           data: {
-            reference: p.reference.trim(),
+            reference: (p.reference ?? "").trim(),
             content: p.content,
+            type: p.type ?? PreceptType.SCRIPTURE,
             order: startOrder + index,
             topic: { connect: { id: topicId } },
           },
@@ -449,10 +458,26 @@ export class TopicsService {
       verses: number[];
       contents: string[];
       notes: any[];
+      freeForm?: { reference: string; type: PreceptType };
     }[] = [];
 
     for (const p of precepts ?? []) {
       const ref = (p?.reference ?? "").toString().trim();
+
+      // Free-form precepts are never merged; keep them in place.
+      if (p?.type === PreceptType.FREEFORM) {
+        groups.push({
+          bookChapter: "",
+          verses: [],
+          contents:
+            typeof p?.content === "string" && p.content.trim()
+              ? [p.content]
+              : [],
+          notes: Array.isArray(p?.notes) ? [...p.notes] : [],
+          freeForm: { reference: ref, type: PreceptType.FREEFORM },
+        });
+        continue;
+      }
 
       if (!ref.includes(":")) {
         continue;
@@ -494,7 +519,7 @@ export class TopicsService {
       verses.sort((a, b) => a - b);
 
       let group = groups.find((g) => {
-        if (g.bookChapter !== bookChapter) return false;
+        if (g.freeForm || g.bookChapter !== bookChapter) return false;
         const maxVerse = Math.max(...g.verses);
         return verses[0] === maxVerse + 1;
       });
@@ -516,6 +541,14 @@ export class TopicsService {
     }
 
     return groups.map((g) => {
+      if (g.freeForm) {
+        return {
+          reference: g.freeForm.reference,
+          type: g.freeForm.type,
+          contents: g.contents,
+          notes: g.notes,
+        };
+      }
       const sortedVerses = Array.from(new Set(g.verses)).sort((a, b) => a - b);
       const minVerse = sortedVerses[0];
       const maxVerse = sortedVerses[sortedVerses.length - 1];
@@ -525,6 +558,7 @@ export class TopicsService {
           minVerse === maxVerse
             ? `${g.bookChapter}:${minVerse}`
             : `${g.bookChapter}:${minVerse}-${maxVerse}`,
+        type: PreceptType.SCRIPTURE,
         contents: g.contents,
         notes: g.notes,
       };
@@ -536,7 +570,11 @@ export class TopicsService {
     preceptId: string,
     dto: UpdatePreceptDto,
   ) {
-    if (!dto.reference && !dto.content) {
+    if (
+      dto.reference === undefined &&
+      dto.content === undefined &&
+      dto.type === undefined
+    ) {
       throw new BadRequestException("Nothing to update");
     }
 
@@ -555,11 +593,20 @@ export class TopicsService {
       throw new ForbiddenException("Not allowed to update this precept");
     }
 
+    const finalType = dto.type ?? precept.type;
+    const finalReference = (dto.reference ?? precept.reference ?? "").trim();
+    if (finalType === PreceptType.SCRIPTURE && !finalReference) {
+      throw new BadRequestException(
+        "A scripture precept needs a reference (e.g. Matthew 4:3)",
+      );
+    }
+
     const updatedPrecept = await this.prisma.precept.update({
       where: { id: preceptId },
       data: {
-        reference: dto.reference,
+        reference: dto.reference?.trim(),
         content: dto.content,
+        type: dto.type,
       },
     });
 
